@@ -1,0 +1,51 @@
+<!-- templates/steuerung.html -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Müllroboter Steuerung</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+       button {
+           padding: 15px;
+           margin: 5px;
+           font-size: 18px;
+       }
+       #status {
+           margin-top: 20px;
+       }
+</style>
+</head>
+<body>
+<h1>Müllroboter Steuerung</h1>
+<form method="POST">
+       {% csrf_token %}
+<div>
+<button name="direction" value="forward">↑ Vorwärts</button>
+</div>
+<div>
+<button name="direction" value="left">← Links</button>
+<button name="direction" value="stop">⏹ Stop</button>
+<button name="direction" value="right">→ Rechts</button>
+</div>
+<div>
+<button name="direction" value="backward">↓ Rückwärts</button>
+</div>
+<div>
+<label for="modeToggle">Autonomer Modus:</label>
+<input type="checkbox" name="autonomous" onchange="this.form.submit()" {% if is_autonomous %}checked{% endif %}>
+</div>
+</form>
+<div id="status">
+<h2>Status</h2>
+<p>Müll erkannt: {{ trash_detected }}</p>
+<p>Ultraschall-Abstand: {{ distance }} cm</p>
+<p>Akkustand: {{ battery_level }}%</p>
+</div>
+   {% if message %}
+<div>
+<strong>{{ message }}</strong>
+</div>
+   {% endif %}
+</body>
+</html>
