@@ -1,2 +1,3 @@
 django
 ai-edge-litert
+opencv-python
