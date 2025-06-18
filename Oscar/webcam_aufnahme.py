@@ -32,7 +32,7 @@ try:
         # Bild speichern
         cv2.imwrite(filename, frame)
         print(f"Bild gespeichert: {filename}")
-        bilder.append(filename)
+        bilder.append(f"webcam_{timestamp}.jpg")
         if len(bilder) > MAX_BILDER:
             os.remove(os.path.join(output_dir, bilder[0]))
             print(f"{bilder[0]} wurde gelöscht (ältestes Bild)")
