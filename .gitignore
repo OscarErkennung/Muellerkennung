@@ -1,4 +1,6 @@
-
-# pixi environments
-.pixi
-*.egg-info
+.env
+tmp
+.venv
+**/__pycache__
+startup_log.txt
+webcam_log.txt
