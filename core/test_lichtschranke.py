@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 import time
  
-RECEIVER_PIN = 31  # GPIO-Pin, an dem der LDR hängt
+RECEIVER_PIN = 5  # GPIO-Pin, an dem der LDR hängt
  
 def callback_func(channel):
     if GPIO.input(channel):
@@ -10,7 +10,7 @@ def callback_func(channel):
         print("Lichtschranke wurde unterbrochen!")
  
 if __name__ == '__main__':
-    GPIO.setmode(GPIO.BOARD)
+    GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
  
     # Setze GPIO23 als Eingang, kein Pullup nötig, da Spannung von außen kommt
