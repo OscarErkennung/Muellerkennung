@@ -4,11 +4,22 @@
 import RPi.GPIO as GPIO
 import time
 # 🧠 Genaue GPIO-Nummern eintragen!
-SPEED_LEFT = 24      # PWM für linke Seite
-DIR_LEFT = 25        # Richtung für linke Seite
-SPEED_RIGHT = 23     # PWM für rechte Seite
-DIR_RIGHT = 22       # Richtung für rechte Seite
+SPEED_RIGHT = 12      # PWM für linke Seite
+DIR_RIGHT = 20        # Richtung für linke Seite
+SPEED_LEFT = 13     # PWM für rechte Seite
+DIR_LEFT = 21       # Richtung für rechte Seite
 PWM_FREQ = 100       # PWM-Frequenz in Hz
+
+#backup real setup: 
+
+#SPEED_RIGHT = 19      # PWM für linke Seite
+#DIR_RIGHT = 26        # Richtung für linke Seite
+#SPEED_LEFT = 13     # PWM für rechte Seite
+#DIR_LEFT = 6       # Richtung für rechte Seite
+#PWM_FREQ = 100       # PWM-Frequenz in Hz
+
+
+
 # GPIO Setup
 GPIO.setmode(GPIO.BCM)
 GPIO.setup([SPEED_LEFT, DIR_LEFT, SPEED_RIGHT, DIR_RIGHT], GPIO.OUT)
@@ -41,11 +52,24 @@ def move_robot(direction, speed=70):
    elif direction == "right":
        GPIO.output(DIR_LEFT, GPIO.HIGH)
        GPIO.output(DIR_RIGHT, GPIO.LOW)
+       
        pwm_left.ChangeDutyCycle(speed)
        pwm_right.ChangeDutyCycle(speed)
    elif direction == "stop":
        pwm_left.ChangeDutyCycle(0)
        pwm_right.ChangeDutyCycle(0)
+   elif direction == "motorleft forward": 
+       GPIO.output(DIR_LEFT, GPIO.HIGH)
+       GPIO.output(DIR_RIGHT, GPIO.LOW)
+       pwm_left.ChangeDutyCycle(speed)
+       pwm_right.ChangeDutyCycle(0)
+   elif direction == "motorrright forward": 
+       GPIO.output(DIR_RIGHT, GPIO.HIGH)
+       GPIO.output(DIR_LEFT, GPIO.LOW)
+       pwm_right.ChangeDutyCycle(speed)
+       pwm_left.ChangeDutyCycle(0)
+
+
 def cleanup():
    pwm_left.stop()
    pwm_right.stop()

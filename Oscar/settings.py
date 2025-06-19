@@ -24,9 +24,12 @@ SECRET_KEY = 'django-insecure-ntd44j7gtkw08t%7z#p9tbifu7bs)(&hn5&9x9ci6vc&wp%(iz
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
-
+#START Change ~JS
+#UNCOMMENT FOR ALLOWING LOCAL HOSTS ONLY
+#ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
+#UNCOMMENT FOR ALLOWING ANY HOSTS
+ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
+#END Change ~JS
 
 # Application definition
 
