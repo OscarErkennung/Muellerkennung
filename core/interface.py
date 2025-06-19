@@ -1,5 +1,6 @@
 import serial, time
 from enum import Enum
+import math
 import core.logger as logger
 
 ser = None
@@ -34,7 +35,43 @@ lookup_directions = {
     Direction.right: {Motor.A: 255, Motor.B: 255, Motor.C: 255, Motor.D: 255}, 
     Direction.stop: {Motor.A: 0, Motor.B: 0, Motor.C: 0, Motor.D: 0}   
 }
+
+def is_between(a, x, b):
+    return min(a, b) < x < max(a, b)
+
+def dir_from_angle(deg:float) -> dict: 
+    """
+    Convert x and y coordinates to a Direction.
+    """
+    # catch simple
+    if deg==0:
+       return lookup_directions.get(Direction.forward)
+    try:
+        assert is_between(0, deg,360)
+    except AssertionError as e: 
+        logger.log(f"Assertion Error: {e}", lvl=40)
+        return Direction.stop
+    x_component = math.cos(math.radians(deg))
+    y_component = math.sin(math.radians(deg))
     
+    output:dict = {}# lookup_directions.get(Direction.stop, {})  #init empty
+    dummy:dict = lookup_directions.get(Direction.stop, {})  #init empty
+    for index, (key, value) in enumerate(dummy.items()):
+        #index, key, value
+        value = x_component * lookup_directions[Direction.forward][key] + y_component * lookup_directions[Direction.right][key]
+        output[key] = round(value)  # Initialize all motors to 0
+        print(f"Index: {index}, Key: {key}, Value: {value}")
+    print(f"Direction from angle {deg}: {output}")
+    ## do vector scaling to fit the range of -255 to 255
+    max_value = max(abs(v) for v in output.values())
+    ##scale down or up, should always return one or all motors at 255
+    if max_value > 255:
+        scale_factor = 255 / max_value
+        for key in output:
+            output[key] = int(output[key] * scale_factor)
+    print(f"Scaled direction: {output}")
+    return output
+
 def interface_setup(): 
     global ser
     try: 
@@ -57,18 +94,18 @@ def interface_cleanup():
     except serial.SerialException as e:
         logger.log(f"Error closing serial port: {e}", lvl=40)
 
-def move_robot_safecast(maybe_dir:str, speed:int=70):
+def move_robot_safecast_linear(maybe_dir:str, speed:int=70):
     """
     Safely cast the direction and move the robot.
     """
     try:
         dir = Direction(maybe_dir)
-        move_robot(dir, speed)
+        move_robot_linear(dir, speed)
     except ValueError as e:
         logger.log(f"Invalid direction: {maybe_dir}. Error: {e}", lvl=40)
 
 
-def move_robot(dir:Direction , speed:int=70): 
+def move_robot_linear(dir:Direction , speed:int=70): 
     """
 
     """    
@@ -83,12 +120,38 @@ def move_robot(dir:Direction , speed:int=70):
     
     for i in Motor:
           # Get the speed for the motor in the specified direction
-        to_send = f'{i}{lookup_directions.get(dir, {}).get(i, 0)}'
+        to_send = f'{i}{lookup_directions.get(dir, {}).get(i, 0)}\n'
         
         if not DEBUG_FLAG: 
             ser.write(to_send.encode('utf-8'))
-            ser.flush()
         print(f'Sent command: {i}={lookup_directions[dir][i]}')
+    time.sleep(0.3)  # Allow time for the command to be processed   
+    ser.flush()
+
+def move_robot_angular_safecast(deg:float, speed:int=70):
+    """
+    Move the robot in a direction based on an angle.
+    """
+    try:
+        assert 0 <= speed <= 100, "Speed must be between 0 and 100"
+        assert type(deg) == float, "Angle must be a float"
+        if not DEBUG_FLAG:
+            assert ser.is_open, "Serial port is not open"
+    except AssertionError as e:
+        logger.log(f"Assertion Error: {e}", lvl=40)
+        return
+
+    motor_values = dir_from_angle(deg)
+    print(f"{motor_values=}")
+    for i in Motor:
+          # Get the speed for the motor in the specified direction
+        to_send = f'{i}{motor_values[i]}\n'
+        
+        if not DEBUG_FLAG: 
+            ser.write(to_send.encode('utf-8'))
+        print(f'Sent command: {i}={motor_values[i]}')
+    time.sleep(0.5)  # Allow time for the command to be processed
+    ser.flush()
 
 if __name__ == "__main__":
     interface_setup()
