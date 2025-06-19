@@ -8,11 +8,11 @@ from datetime import datetime
 # Maximal erlaubte Anzahl von Bildern
 MAX_BILDER = 100
  
-MODEL_PATH = "resnet50_trash_classifier.tflite"
+MODEL_PATH = "mobile_net_v2_2025-06-19_11:45:29.873886.tflite"
 output_dir = "tmp"
 os.makedirs(output_dir, exist_ok=True)
  
-labels = ["plastic","paper","trash","notrash"]
+labels = ["notrash", "trash"]
 
 interpreter = tflite.Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
@@ -48,25 +48,24 @@ try:
 
 	    # Bild vorbereiten
         img = cv2.resize(frame, (width, height))
-        input_data = np.expand_dims(img, axis=0)
- 
-      
+        # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+        debug_filename = os.path.join(f"debug/input_{timestamp}.jpg")
+        cv2.imwrite(debug_filename, img)  # Achtung: Werte müssen zwischen 0-255 sein
+        
+        input_data = img.astype(np.float32) / 255.0
+        input_data = np.expand_dims(input_data, axis=0)
+        
+      
         # Modell ausführen
         interpreter.set_tensor(input_index, input_data)
         interpreter.invoke()
-        output_data = interpreter.get_tensor(output_index)[0] 
+        output_data = interpreter.get_tensor(output_index) 
 
-        predicted_index = int(np.argmax(output_data))
-        confidence = float(output_data[predicted_index])
+        predicted_index = int(round(output_data[0][0]))
         label = labels[predicted_index]
+        print(f"[{timestamp}]  {output_data[0][0]:.4f}  |  {label}")
  
-        # Ausgabe
-        if label =="notrash":
-            print(f"[{timestamp}] Kein MÜLL erkannt")
-        else:
-            print(f"[{timestamp}] MÜLL erkannt: {label.upper()} ({confidence:.2f})")
-
         # Bilderliste neu laden und nach Änderungszeit sortieren
         bilder = sorted(
             [f for f in os.listdir(output_dir) if f.endswith(".jpg")],
