@@ -2,79 +2,23 @@
 # import serial
 # Beispiel: Serieller Port
 import RPi.GPIO as GPIO
+from gpiozero import DistanceSensor
+from core import logger
 import time
-# 🧠 Genaue GPIO-Nummern eintragen!
-SPEED_RIGHT = 12      # PWM für linke Seite
-DIR_RIGHT = 20        # Richtung für linke Seite
-SPEED_LEFT = 13     # PWM für rechte Seite
-DIR_LEFT = 21       # Richtung für rechte Seite
-PWM_FREQ = 100       # PWM-Frequenz in Hz
-
-#backup real setup: 
-
-#SPEED_RIGHT = 19      # PWM für linke Seite
-#DIR_RIGHT = 26        # Richtung für linke Seite
-#SPEED_LEFT = 13     # PWM für rechte Seite
-#DIR_LEFT = 6       # Richtung für rechte Seite
-#PWM_FREQ = 100       # PWM-Frequenz in Hz
-
-
 
 # GPIO Setup
 GPIO.setmode(GPIO.BCM)
-GPIO.setup([SPEED_LEFT, DIR_LEFT, SPEED_RIGHT, DIR_RIGHT], GPIO.OUT)
-# PWM initialisieren
-pwm_left = GPIO.PWM(SPEED_LEFT, PWM_FREQ)
-pwm_right = GPIO.PWM(SPEED_RIGHT, PWM_FREQ)
-pwm_left.start(0)
-pwm_right.start(0)
-def move_robot(direction, speed=70):
-   """
-   Steuert den Roboter in eine bestimmte Richtung
-   direction: 'forward', 'backward', 'left', 'right', 'stop'
-   speed: PWM-Stärke (0–100)
-   """
-   if direction == "forward":
-       GPIO.output(DIR_LEFT, GPIO.HIGH)
-       GPIO.output(DIR_RIGHT, GPIO.HIGH)
-       pwm_left.ChangeDutyCycle(speed)
-       pwm_right.ChangeDutyCycle(speed)
-   elif direction == "backward":
-       GPIO.output(DIR_LEFT, GPIO.LOW)
-       GPIO.output(DIR_RIGHT, GPIO.LOW)
-       pwm_left.ChangeDutyCycle(speed)
-       pwm_right.ChangeDutyCycle(speed)
-   elif direction == "left":
-       GPIO.output(DIR_LEFT, GPIO.LOW)
-       GPIO.output(DIR_RIGHT, GPIO.HIGH)
-       pwm_left.ChangeDutyCycle(speed)
-       pwm_right.ChangeDutyCycle(speed)
-   elif direction == "right":
-       GPIO.output(DIR_LEFT, GPIO.HIGH)
-       GPIO.output(DIR_RIGHT, GPIO.LOW)
-       
-       pwm_left.ChangeDutyCycle(speed)
-       pwm_right.ChangeDutyCycle(speed)
-   elif direction == "stop":
-       pwm_left.ChangeDutyCycle(0)
-       pwm_right.ChangeDutyCycle(0)
-   elif direction == "motorleft forward": 
-       GPIO.output(DIR_LEFT, GPIO.HIGH)
-       GPIO.output(DIR_RIGHT, GPIO.LOW)
-       pwm_left.ChangeDutyCycle(speed)
-       pwm_right.ChangeDutyCycle(0)
-   elif direction == "motorrright forward": 
-       GPIO.output(DIR_RIGHT, GPIO.HIGH)
-       GPIO.output(DIR_LEFT, GPIO.LOW)
-       pwm_right.ChangeDutyCycle(speed)
-       pwm_left.ChangeDutyCycle(0)
+
+distance_front_sensor = DistanceSensor(echo=19, trigger=26)
+#distance_back_sensor = DistanceSensor(echo=XXX, trigger=YYY)
+#distance_left_sensor = DistanceSensor(echo=XXX, trigger=YYY)
+#distance_right_sensor = DistanceSensor(echo=XXX, trigger=YYY)
 
 
 def cleanup():
-   pwm_left.stop()
-   pwm_right.stop()
    GPIO.cleanup()
-   #arduino.write(command_map[direction].encode())
+   #test
+
 def set_autonomous_mode(enabled):
    #arduino.write(b'A1' if enabled else b'A0')
    pass
@@ -88,6 +32,28 @@ def get_status():
 def detect_trash():
    # TODO: Anbindung an CV-Modul
    return False
-def get_ultrasound_distance():
+def get_ultrasound_distance(round2n=True):#currently front only.
    # TODO: Werte vom Sensor lesen
-   return 45  # cm
+   distance = distance_front_sensor.distance * 100  # Umwandlung in cm
+   logger.log(f"Measured Distance: {distance:.2f} cm")
+   if round2n:
+      return round(distance, 2)  # cm
+   else:
+      return distance  # cm
+
+
+if __name__ == "__main__": 
+   try:
+       while True:
+           distance = distance_front_sensor.distance * 100  # Umwandlung in cm
+           print(f"Distance: {distance:.2f} cm")
+           time.sleep(1)
+   except KeyboardInterrupt:
+       print("Measurement stopped by User")
+       GPIO.cleanup()
+   except Exception as e:
+       print(f"An error occurred: {e}")
+       GPIO.cleanup()
+   else: 
+      #we are a module. 
+      pass
