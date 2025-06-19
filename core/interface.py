@@ -1,17 +1,19 @@
 import serial, time
 from enum import Enum
 import math
-import core.logger as logger
+import logger as logger
 
 ser = None
 
 DEBUG_FLAG:bool = False  # Set to True for debugging, False for production
-
+CALIBRATION_VALUE = 105
 
 #interface A,B,C,D = <uint_8t speed>
 
-#A   B
-#C   D
+#B   C
+#A   D
+
+# C&D inverted
 
 class Direction(Enum):
     forward = 'forward'
@@ -19,6 +21,7 @@ class Direction(Enum):
     left = 'left'
     right = 'right'
     stop = 'stop'
+    rotate_cw = 'rotate_cw'
 
 class Motor(Enum):
     A = 'A'
@@ -33,7 +36,8 @@ lookup_directions = {
     Direction.stop: {Motor.A: 0, Motor.B: 0, Motor.C: 0, Motor.D: 0},
     Direction.left: {Motor.A: -255, Motor.B: -255, Motor.C: -255, Motor.D: -255},
     Direction.right: {Motor.A: 255, Motor.B: 255, Motor.C: 255, Motor.D: 255}, 
-    Direction.stop: {Motor.A: 0, Motor.B: 0, Motor.C: 0, Motor.D: 0}   
+    Direction.stop: {Motor.A: 0, Motor.B: 0, Motor.C: 0, Motor.D: 0},
+    Direction.rotate_cw: {Motor.A: 0, Motor.B: 255, Motor.C: 255, Motor.D: 0}
 }
 
 def is_between(a, x, b):
@@ -150,21 +154,41 @@ def move_robot_angular_safecast(deg:float, speed:int=70):
         if not DEBUG_FLAG: 
             ser.write(to_send.encode('utf-8'))
         print(f'Sent command: {i}={motor_values[i]}')
-    time.sleep(0.5)  # Allow time for the command to be processed
+    time.sleep(round(), 2)  # Allow time for the command to be processed
     ser.flush()
 
+def rotate_robot_cw(deg:int, speed:int=70):
+    """
+    Rotate the robot clockwise.
+
+    1 sec is 124deg°
+    -> 
+    """
+    try:
+        assert 0 <= speed <= 100, "Speed must be between 0 and 100"
+        if not DEBUG_FLAG:
+            assert ser.is_open, "Serial port is not open"
+    except AssertionError as e:
+        logger.log(f"Assertion Error: {e}", lvl=40)
+        return
+    
+    move_robot_linear(Direction.rotate_cw, 100)
+    time.sleep(deg/CALIBRATION_VALUE) #drehe über steuerbord.
+    move_robot_linear(Direction.stop, 0)
+    return
 if __name__ == "__main__":
     interface_setup()
-    move_robot(Direction.forward, 70)
-    time.sleep(1)
-    move_robot(Direction.backward, 70)
-    time.sleep(1)
-    move_robot(Direction.left, 70)
-    time.sleep(1)
-    move_robot(Direction.right, 70)
-    time.sleep(1)
-    move_robot(Direction.stop, 0)
-    time.sleep(1)
+    rotate_robot_cw(360, 70)
+    #move_robot(Direction.forward, 70)
+    #time.sleep(1)
+    #move_robot(Direction.backward, 70)
+    #time.sleep(1)
+    #move_robot(Direction.left, 70)
+    #time.sleep(1)
+    #move_robot(Direction.right, 70)
+    #time.sleep(1)
+    #move_robot(Direction.stop, 0)
+    #time.sleep(1)
     interface_cleanup()
 else: 
     DEBUG_FLAG = False # never debug as module.
