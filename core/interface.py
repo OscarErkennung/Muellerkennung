@@ -1,6 +1,6 @@
 import serial, time
 from enum import Enum
-import logger
+import core.logger as logger
 
 ser = None
 
@@ -43,7 +43,6 @@ def interface_setup():
             time.sleep(4)
             if not ser.is_open: 
                  ser.open()
-
         else:
             ser = None  # For debugging, we don't open a real serial port
         print("Serial port opened successfully.")
@@ -58,6 +57,16 @@ def interface_cleanup():
     except serial.SerialException as e:
         logger.log(f"Error closing serial port: {e}", lvl=40)
 
+def move_robot_safecast(maybe_dir:str, speed:int=70):
+    """
+    Safely cast the direction and move the robot.
+    """
+    try:
+        dir = Direction(maybe_dir)
+        move_robot(dir, speed)
+    except ValueError as e:
+        logger.log(f"Invalid direction: {maybe_dir}. Error: {e}", lvl=40)
+
 
 def move_robot(dir:Direction , speed:int=70): 
     """
@@ -71,15 +80,15 @@ def move_robot(dir:Direction , speed:int=70):
     except AssertionError as e:
         logger.log(f"Assertion Error: {e}", lvl=40)
         return
+    
     for i in Motor:
           # Get the speed for the motor in the specified direction
-        to_send = f'{i}{lookup_directions.get(dir, {}).get(i, 0)}\n'
+        to_send = f'{i}{lookup_directions.get(dir, {}).get(i, 0)}'
         
         if not DEBUG_FLAG: 
             ser.write(to_send.encode('utf-8'))
-            print(f"{to_send}")
             ser.flush()
-            #print(f'Sent command: {i}={lookup_directions[dir][i]}')
+        print(f'Sent command: {i}={lookup_directions[dir][i]}')
 
 if __name__ == "__main__":
     interface_setup()
@@ -94,5 +103,9 @@ if __name__ == "__main__":
     move_robot(Direction.stop, 0)
     time.sleep(1)
     interface_cleanup()
+else: 
+    DEBUG_FLAG = False # never debug as module.
+    interface_setup()
+    logger.log("module init for interface complete")
 
 

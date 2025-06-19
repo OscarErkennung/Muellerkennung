@@ -1,6 +1,6 @@
 .env
 tmp
-.venv
+venv
 **/__pycache__
 startup_log.txt
 webcam_log.txt

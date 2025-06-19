@@ -2,7 +2,8 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.shortcuts import render, redirect
-from .robot_control import move_robot, get_status, set_autonomous_mode
+from .robot_control import get_status, set_autonomous_mode
+from .interface import move_robot_safecast
 autonomous = False
 def steuerung(request):
    global autonomous
@@ -11,7 +12,7 @@ def steuerung(request):
        if 'direction' in request.POST:
            direction = request.POST['direction']
            if not autonomous:
-               move_robot(direction)
+               move_robot_safecast(direction)
                message = f"Bewegung: {direction}"
            else:
                message = "Autonomer Modus aktiviert. Manuelle Steuerung deaktiviert."
