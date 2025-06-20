@@ -57,7 +57,11 @@ def cleanup():
 def get_ultrasound_distance(round2n=True):  # currently front only.
    # TODO: Werte vom Sensor lesen
    global distance_front_sensor
-   distance = distance_front_sensor.distance * 100  # Umwandlung in cm
+   try: 
+      distance = distance_front_sensor.distance * 100  # Umwandlung in cm
+   except AttributeError as e:
+      logger.log("Distance sensor not initialized, please call gpio_setup() first.", lvl=50)
+      return -1
    logger.log(f"Measured Distance: {distance:.2f} cm")
    if round2n:
       return round(distance, 2)  # cm
