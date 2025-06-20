@@ -1,16 +1,17 @@
 # robot_control.py
 # import serial
 # Beispiel: Serieller Port
-from bdb import Breakpoint
 from random import randint
-from turtle import forward
 from typing import Callable
-import RPi.GPIO as GPIO
-from gpiozero import Device, DistanceSensor
-from gpiozero.pins.native import NativeFactory
+try:
+    import RPi.GPIO as GPIO
+    from gpiozero import DistanceSensor
+except ImportError:
+    from rpi_mockups import GPIO
+    from rpi_mockups import DistanceSensor
 from core import logger, interface, core_main
 import time
-from functools import partial 
+from functools import partial
 
 RECEIVER_PIN1 = 17  # gpio pin for photoresistive divider.
 RECEIVER_PIN2 = 27  # gpio pin for photoresistive divider.

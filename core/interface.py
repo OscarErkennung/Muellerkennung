@@ -1,4 +1,8 @@
-import serial, time
+try:
+    import serial
+except ImportError:
+    import rpi_mockups as serial
+import time
 from enum import Enum
 import math
 import core.logger as logger
