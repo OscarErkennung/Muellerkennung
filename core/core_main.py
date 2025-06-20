@@ -131,7 +131,7 @@ def app_main():
 
 def lightbar_callback(shared_status: RobotStatus): 
     core.play_sound_safecast("thanks") #thank user when throwing something in
-    shared_status.increase_trash_count()
+    shared_status.handle_trash_thrown()
 
 
 def app_worker(shared_status: RobotStatus):
