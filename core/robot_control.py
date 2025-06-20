@@ -102,7 +102,7 @@ def move_autonomous():
         case "distance":
             # we see a wall, turn roomba style.
             interface.move_robot_linear(interface.Direction.backward, speed=50)
-            time.sleep(0.5)
+            time.sleep(0.25)
             interface.rotate_robot(180)
         case "trash":
             # Do nothing
