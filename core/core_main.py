@@ -2,6 +2,7 @@
 import signal
 from http.client import REQUEST_URI_TOO_LONG
 import os
+import json
 import time
 import threading
 import core.interface
@@ -9,7 +10,6 @@ import core.logger
 import core.robot_control
 import core.sound
 import core.screen
-
 
 TRASH_CONSUMPTION_TIMEOUT = 10
 
@@ -23,6 +23,7 @@ def stop_signal_handler(sig, frame):
         print("Stopping CORE")
     global stop_flag
     stop_flag.set()
+    exit()
 
 
 signal.signal(signal.SIGINT, stop_signal_handler)
@@ -110,7 +111,6 @@ class RobotStatus:
         with self.lock:
             self._message = f"Trash #{self._trash_consumed_count} has been consumed"
             self._trash_detected = False
-        core.screen.set_image("face")
 
 
 our_status = RobotStatus()
@@ -130,16 +130,25 @@ def app_main():
     """
     # perform startup sequences.
     core.sound.play_sound_safecast("START")
+    # start subthreads....
     core.screen.set_image("face")
     # start subthread....
     worker_thread = threading.Thread(target=app_worker, args={our_status})
     worker_thread.daemon = True
     worker_thread.start()
+
+    sensor_thread = threading.Thread(target=sensor_worker, args={our_status})
+    sensor_thread.daemon = True
+    sensor_thread.start()
+
     # TODO start subthread for camera
-    from webcam import camera_worker
+    from core.webcam import camera_worker
     camera_thread = threading.Thread(target=camera_worker, args={})
     camera_thread.daemon = True
     camera_thread.start()
+
+    # amd set callback for beam:
+    # camera_thread.start()
 
     # amd set callback for beam:
 
@@ -169,7 +178,7 @@ def app_worker(shared_status: RobotStatus):
     return
 
 
-def sensor_worker(shared_status: RobotStatus, stop_flag: threading.Event):
+def sensor_worker(shared_status: RobotStatus):
     """
     This worker thread is responsible for reading sensors and updating the shared status.
     """

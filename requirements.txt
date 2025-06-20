@@ -8,3 +8,6 @@ gpiozero==2.0.1
 lgpio==0.2.2.0
 pigpio==1.78
 rpi-lgpio==0.6
+tflite-runtime==2.14.0
+opencv-python
+ai_edge_litert
