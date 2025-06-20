@@ -1,33 +1,104 @@
 #!/bin/python
+import signal
 from http.client import REQUEST_URI_TOO_LONG
 import os, time, threading, core.interface, core.logger, core.robot_control, core.sound
+
+
+TRASH_CONSUMPTION_TIMEOUT = 10
 
 autonomous_mode_enabled = False
 stop_flag = threading.Event()
 trash_count = 0
 
 
+def stop_signal_handler(sig, frame):
+    if os.environ.get("RUN_MAIN") == "true":
+        print("Stopping CORE")
+    global stop_flag
+    stop_flag.set()
+
+signal.signal(signal.SIGINT, stop_signal_handler)
+
+
 class RobotStatus:
-    status = {}  
+    status = {}
     def __init__(self):
-        self.status['trash_detected'] = 0
-        self.status['distance'] = 0
-        self.status['battery_level'] = 100  # Beispielwert
-        self.status['is_autonomous'] = False
-        self.status['message'] = ""
-        self.status['total'] = 1000  # Beispielwert
+        self._trash_detected = False
+        self._distance = -1
+        self._battery_level = 100
+        self._is_autonomous = False
+        self._message = ""
+        self._trash_found_count = 0
+        self._trash_consumed_count = 0
+        self._lock = threading.Lock()
         self.lock = threading.Lock()  # Lock for thread-safe access to status
-    def update_status(self, new_status): 
+
+    def set_trash_detected(self, value):
+        with self._lock:
+            self._trash_detected = value
+
+    def get_trash_detected(self):
+        return self._trash_detected
+
+    def set_battery_level(self, value):
+        with self._lock:
+            self._battery_level = value
+
+    def get_battery_level(self):
+        return self._battery_level
+
+    def set_distance(self, value):
+        with self._lock:
+            self._distance = value
+
+    def get_distance(self):
+        return self._distance
+
+    def set_is_autonomous(self, value):
+        with self._lock:
+            self._is_autonomous = value
+
+    def get_is_autonomous(self):
+        return self._is_autonomous
+
+    def set_message(self, value):
+        with self._lock:
+            self._message = value
+
+    def get_message(self):
+        return self._message
+
+    def _set_trash_found_count(self, value):
+        with self._lock:
+            self._trash_found_count = value
+
+    def get_trash_found_count(self):
+        return self._trash_found_count
+
+    def get_trash_consumed_count(self):
+        return self._trash_consumed_count
+
+    def handle_trash_found(self):
+
+        def clear_trash_detected():
+            """ Helper method to clear trash detected after 10 seconds """
+            thrash_consumed = self._trash_consumed_count
+            time.sleep(TRASH_CONSUMPTION_TIMEOUT)
+            with self._lock:
+                if self._trash_detected and self._trash_consumed_count == thrash_consumed:
+                    self._trash_detected = False
+
         with self.lock:
-            self.status.update(new_status)
-    
-    def getstate(self):
+            self._trash_found_count += 1
+            self._message = f"Trash #{self._trash_found_count} detected"
+            self._trash_detected = True
+            threading.Thread(target=clear_trash_detected).start()
+
+    def handle_trash_thrown(self):
         with self.lock:
-            return self.status.copy()
-    def increase_trash_count(self):
-        with self.lock:
-            self.status['trash_detected'] += 1
-            self.status['message'] = f"Trash detected: {self.status['trash_detected']} items"
+            self._message = f"Trash #{self._trash_consumed_count} has been consumed"
+            self._trash_detected = False
+
 
 
 our_status = RobotStatus()
@@ -36,7 +107,8 @@ def get_system_status():
     """
     Returns the current system status as a dictionary.
     """
-    return our_status.getstate()
+    global our_status
+    return our_status
 
 def app_main(): 
     """
@@ -49,9 +121,10 @@ def app_main():
     worker_thread.daemon = True
     worker_thread.start()
     # TODO start subthread for camera
-    #camera_thread = threading.Thread(target=camera_worker, args={})
-    #camera_thread.daemon = True
-    #camera_thread.start
+    from webcam import camera_worker
+    camera_thread = threading.Thread(target=camera_worker, args={})
+    camera_thread.daemon = True
+    camera_thread.start()
     
     #amd set callback for beam: 
 
@@ -68,7 +141,7 @@ def app_worker(shared_status: RobotStatus):
     core.robot_control.set_lightbar_callback(lightbar_callback)  # Set the callback for the lightbar
     print("Worker thread started.") 
     while not stop_flag.is_set(): 
-        while shared_status.getstate()['is_autonomous']: #TODO should be a view.
+        while shared_status.get_is_autonomous(): # TODO: should be a view
             #drive autonomously.
             core.robot_control.move_autonomous()
         else:
@@ -85,9 +158,9 @@ def sensor_worker(shared_status: RobotStatus, stop_flag: threading.Event):
     while not stop_flag.is_set():
         # Read sensors and update shared_status
         distance = core.robot_control.get_ultrasound_distance(round2n=True)
-        
+
         # Update the shared status with the new distance
-        shared_status.update_status({'distance': distance})
+        shared_status.set_distance(distance)
         # Sleep for a short duration to avoid busy waiting
         time.sleep(1)  # Adjust the sleep duration as needed
 
