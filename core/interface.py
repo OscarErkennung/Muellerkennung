@@ -22,6 +22,7 @@ class Direction(Enum):
     right = 'right'
     stop = 'stop'
     rotate_cw = 'rotate_cw'
+    rotate_ccw = 'rotate_ccw'
 
 class Motor(Enum):
     A = 'A'
@@ -37,7 +38,8 @@ lookup_directions = {
     Direction.left: {Motor.A: -255, Motor.B: -255, Motor.C: -255, Motor.D: -255},
     Direction.right: {Motor.A: 255, Motor.B: 255, Motor.C: 255, Motor.D: 255}, 
     Direction.stop: {Motor.A: 0, Motor.B: 0, Motor.C: 0, Motor.D: 0},
-    Direction.rotate_cw: {Motor.A: 0, Motor.B: 255, Motor.C: 255, Motor.D: 0}
+    Direction.rotate_cw: {Motor.A: 0, Motor.B: 255, Motor.C: 255, Motor.D: 0},
+    Direction.rotate_ccw: {Motor.A: 0, Motor.B: -255, Motor.C: -255, Motor.D: 0}
 }
 
 def is_between(a, x, b):
@@ -80,7 +82,7 @@ def interface_setup():
     global ser
     try: 
         if not DEBUG_FLAG: 
-            ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+            ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)#can be ttyUSB0 or ttyUSB1
             time.sleep(4)
             if not ser.is_open: 
                  ser.open()
@@ -173,8 +175,8 @@ def rotate_robot(deg:int, speed:int=70):
         logger.log(f"Assertion Error: {e}", lvl=40)
         return
     
-    move_robot_linear(Direction.rotate_cw, 100) if deg>0 else move_robot_linear(Direction.ccw, 100)
-    time.sleep(deg/CALIBRATION_VALUE) #drehe über steuerbord.
+    move_robot_linear(Direction.rotate_cw, 100) if deg>0 else move_robot_linear(Direction.rotate_ccw, 100)
+    time.sleep(abs(deg/CALIBRATION_VALUE)) #drehe über steuerbord.
     move_robot_linear(Direction.stop, 0)
     return
 if __name__ == "__main__":

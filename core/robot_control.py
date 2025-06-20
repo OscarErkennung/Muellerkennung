@@ -8,8 +8,7 @@ from typing import Callable
 import RPi.GPIO as GPIO
 from gpiozero import Device, DistanceSensor
 from gpiozero.pins.native import NativeFactory
-from core import logger, interface
-import core.core_main
+from core import logger, interface, core_main
 import time
 from functools import partial 
 
@@ -17,7 +16,7 @@ RECEIVER_PIN1 = 17  # gpio pin for photoresistive divider.
 RECEIVER_PIN2 = 27  # gpio pin for photoresistive divider.
 RECEIVER_PIN3 = 22  # gpio pin for photoresistive divider.
 MIN_DISTANCE = 80  # dm
-TIME_THRESHOLD = 10  # secs
+TIME_THRESHOLD = 5  # secs
 
 distance_front_sensor = None
 gpio_is_setup = False
@@ -76,7 +75,7 @@ def get_ultrasound_distance(round2n=True):  # currently front only.
 def move_autonomous():
     # setup
     interface.move_robot_linear(interface.Direction.forward)
-    start_time = time.now()
+    start_time = time.time()
     # move forward until we have to do something.
     while True:
         if get_ultrasound_distance() == -1:
@@ -85,7 +84,7 @@ def move_autonomous():
         if get_ultrasound_distance() <= MIN_DISTANCE:
             reason = "distance"
             break
-        if (time.now() - start_time) >= TIME_THRESHOLD:  # cm
+        if (time.time() - start_time) >= TIME_THRESHOLD:  # cm
             reason = "time"
             break
         if core_main.our_status.get_trash_detected():
@@ -106,6 +105,7 @@ def move_autonomous():
             # Do nothing
             pass
         case "uninitialized":
+            print("Unitialized distance sensor, cannot move autonomously!")
             logger.log("Distance sensor has not yet been read, preventing sensorless autonomous mode!")
 
 if __name__ == "__main__":

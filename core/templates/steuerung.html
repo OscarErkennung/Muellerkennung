@@ -92,7 +92,7 @@
         }
 
         strong {
-            color: #d32f2f;
+            color: #CCC;
             font-size: 1.1rem;
         }
     </style>
@@ -106,6 +106,8 @@
                 document.getElementById('trash-detected').innerText = data.trash_detected;
                 document.getElementById('distance').innerText = data.distance;
                 document.getElementById('battery-level').innerText = data.battery_level;
+                document.getElementById('autonomous').innerText = data.is_autonomous ? 'Aktiv' : 'Inaktiv';
+                document.getElementById('auto-checkbox').checked = data.is_autonomous;
 
                 // Nachricht ein- oder ausblenden
                 const messageContainer = document.getElementById('message-container');
@@ -118,13 +120,13 @@
                     messageContainer.style.display = 'none';
                 }
             });
-    }, 2000); // alle 2 Sekunden
+    }, 500); // alle 2 Sekunden
 
 </script>
 </head>
 <body>
 <h1>Müllroboter Steuerung</h1>
-<form method="POST">
+<form method="POST" action="{% url 'steuerung' %}">
        {% csrf_token %}
 <div>
 <button name="direction" value="forward">↑ Vorwärts</button>
@@ -138,8 +140,8 @@
 <button name="direction" value="backward">↓ Rückwärts</button>
 </div>
 <div>
-<label for="modeToggle">Autonomer Modus:</label>
-<input type="checkbox" name="autonomous" onchange="this.form.submit()" {% if is_autonomous %}checked{% endif %}>
+<label for="autonomous">Autonomer Modus:</label>
+<input type="checkbox" id="auto-checkbox" name="autonomous" onchange="this.form.submit()" {% if is_autonomous %}checked{% endif %}>
 </div>
 </form>
 <div id="status">
@@ -147,6 +149,7 @@
     <p>Müll erkannt: <span id="trash-detected"></span></p>
     <p>Ultraschall-Abstand: <span id="distance"></span> cm</p>
     <p>Akkustand: <span id="battery-level"></span>%</p>
+    <p>Autonomer Modus: <span id="autonomous"></span></p>
 </div>
 <div id="message-container" style="display: none;">
     <strong id="message"></strong>

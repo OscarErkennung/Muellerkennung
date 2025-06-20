@@ -145,11 +145,11 @@ def app_main():
     # start subthreads....
     core.screen.set_image("face")
     # start subthread....
-    worker_thread = threading.Thread(target=app_worker, args={our_status})
+    worker_thread = threading.Thread(target=app_worker)
     worker_thread.daemon = True
     worker_thread.start()
 
-    sensor_thread = threading.Thread(target=sensor_worker, args={our_status})
+    sensor_thread = threading.Thread(target=sensor_worker)
     sensor_thread.daemon = True
     sensor_thread.start()
 
@@ -175,16 +175,17 @@ def lightbar_callback(shared_status: RobotStatus, channel):
     shared_status.handle_trash_thrown()
 
 
-def app_worker(shared_status: RobotStatus):
+def app_worker():
     # since some of the movement functions include blocking features,
     # they should be called from this seperate thread.
     core.robot_control.gpio_setup()
     time.sleep(2)  # Wait for GPIO setup to complete
-    core.robot_control.set_lightbar_callback(lightbar_callback, shared_status)  # Set the callback for the lightbar
+    core.robot_control.set_lightbar_callback(lightbar_callback, our_status)  # Set the callback for the lightbar
     
     print("Worker thread started.")
     while not stop_flag.is_set():
-        while shared_status.get_is_autonomous():  # TODO: should be a view
+        print(f"App worker heartbeat <3 {our_status.get_is_autonomous()}")
+        while our_status.get_is_autonomous() and not our_status.get_trash_detected():  # TODO: should be a view
             # drive autonomously.
             core.robot_control.move_autonomous()
         else:
@@ -195,7 +196,7 @@ def app_worker(shared_status: RobotStatus):
     return
 
 
-def sensor_worker(shared_status: RobotStatus):
+def sensor_worker():
     """
     This worker thread is responsible for reading sensors and updating the shared status.
     """
@@ -204,7 +205,7 @@ def sensor_worker(shared_status: RobotStatus):
         distance = core.robot_control.get_ultrasound_distance(round2n=True)
 
         # Update the shared status with the new distance
-        shared_status.set_distance(distance)
+        our_status.set_distance(distance)
         # Sleep for a short duration to avoid busy waiting
         time.sleep(1)  # Adjust the sleep duration as needed
 
