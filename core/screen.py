@@ -9,4 +9,4 @@ def set_image(name: str):
         last_process.wait()
 
 
-    last_process = subprocess.Popen(["feh", "--fullscreen", "--auto-zoom", "./images/{name}.png"])
+    last_process = subprocess.Popen(["feh", "--fullscreen", "--auto-zoom", f"./images/{name}.png"])
