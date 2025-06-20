@@ -25,8 +25,8 @@ def steuerung(request):
            message = "Modus geändert"
    status =  core_main.get_system_status()#todo move dict conversion into get_status / remove double keys.
     
-   return render(request, 'steuerung.html',json.loads(status))
+   return render(request, 'steuerung.html',json.loads(status.to_json()))
 
-def get_status(request): 
-    
-    return JsonResponse(json.loads(core_main.get_system_status()), safe=False)
+def get_status(request):
+    status = core_main.get_system_status()
+    return JsonResponse(json.loads(status.to_json()), safe=False)

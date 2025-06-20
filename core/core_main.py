@@ -112,7 +112,17 @@ class RobotStatus:
             self._message = f"Trash #{self._trash_consumed_count} has been consumed"
             self._trash_consumed_count += 1
             self._trash_detected = False
-
+    def to_json(self):
+        status = {
+            "trash_detected": self._trash_detected,
+            "distance": self._distance,
+            "battery_level": self._battery_level,
+            "is_autonomous": self._is_autonomous,
+            "message": self._message,
+            "trash_found_count": self._trash_found_count,
+            "trash_consumed_count": self._trash_consumed_count
+        }
+        return json.dumps(status)
 
 our_status = RobotStatus()
 
