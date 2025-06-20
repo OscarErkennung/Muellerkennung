@@ -15,6 +15,15 @@
            margin-top: 20px;
        }
 </style>
+<script>
+  setInterval(() => {
+    fetch('/get-status/')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('status').innerText = data.status;
+      });
+  }, 2000); // every 2 seconds
+</script>
 </head>
 <body>
 <h1>Müllroboter Steuerung</h1>
