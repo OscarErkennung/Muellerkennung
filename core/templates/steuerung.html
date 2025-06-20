@@ -5,16 +5,98 @@
 <meta charset="UTF-8">
 <title>Müllroboter Steuerung</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-       button {
-           padding: 15px;
-           margin: 5px;
-           font-size: 18px;
-       }
-       #status {
-           margin-top: 20px;
-       }
-</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #e0f7fa, #80deea);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #006064;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: #ffffffcc;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        button {
+            padding: 15px 25px;
+            margin: 5px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            background: #00838f;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            background: #00acc1;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        label {
+            font-weight: bold;
+            color: #004d40;
+        }
+
+        input[type="checkbox"] {
+            transform: scale(1.5);
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        #status {
+            margin-top: 30px;
+            background: #ffffffcc;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: left;
+        }
+
+        #status h2 {
+            color: #006064;
+            margin-top: 0;
+        }
+
+        #status p {
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+
+        strong {
+            color: #d32f2f;
+            font-size: 1.1rem;
+        }
+    </style>
+
 <script>
   setInterval(() => {
     fetch('/get_status/')
