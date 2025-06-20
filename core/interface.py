@@ -44,8 +44,8 @@ lookup_directions = {
     Direction.left: {Motor.A: -255, Motor.B: -255, Motor.C: -255, Motor.D: -255},
     Direction.right: {Motor.A: 255, Motor.B: 255, Motor.C: 255, Motor.D: 255}, 
     Direction.stop: {Motor.A: 0, Motor.B: 0, Motor.C: 0, Motor.D: 0},
-    Direction.rotate_cw: {Motor.A: 255, Motor.B: 255, Motor.C: 255, Motor.D: 255},
-    Direction.rotate_ccw: {Motor.A: -255, Motor.B: -255, Motor.C: -255, Motor.D: -255}
+    Direction.rotate_cw: {Motor.A: 255, Motor.B: 0, Motor.C: 0, Motor.D: 255},
+    Direction.rotate_ccw: {Motor.A: -255, Motor.B: 0, Motor.C: 0, Motor.D: -255}
 }
 
 def is_between(a, x, b):
