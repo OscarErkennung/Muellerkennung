@@ -29,4 +29,4 @@ def steuerung(request):
 
 def get_status(request): 
     
-    return JsonResponse(core_main.get_system_status(), safe=False)
+    return JsonResponse(json.loads(core_main.get_system_status()), safe=False)
