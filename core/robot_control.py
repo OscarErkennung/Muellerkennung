@@ -97,11 +97,13 @@ def move_autonomous():
     match reason:
         case "time":
             # turn randomly to cover free area.
-            interface.rotate_robot(30, 50)
+            random_direction = randint(-130, 130)
+            interface.rotate_robot(random_direction, 50)
         case "distance":
             # we see a wall, turn roomba style.
-            random_direction = randint(-60, 60)
-            interface.rotate_robot(random_direction)
+            interface.move_robot_linear(interface.Direction.backward, speed=50)
+            time.sleep(0.25)
+            interface.rotate_robot(180)
         case "trash":
             # Do nothing
             pass
