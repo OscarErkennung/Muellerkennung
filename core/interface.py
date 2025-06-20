@@ -1,7 +1,7 @@
 import serial, time
 from enum import Enum
 import math
-import logger as logger
+import core.logger as logger
 
 ser = None
 

@@ -2,7 +2,7 @@
 
 import os, subprocess
 from enum import Enum
-import logger as logger
+import core.logger as logger
 ##asume launching from "Muellerkennung"
 #Sound_dir = os.getcwd() + '/core/sounds/'
 ##asume sound is in predifined path 
@@ -34,7 +34,7 @@ def play_sound(mysound:Sound):
     sound_file = sound_dir + mysound.value.get('file', '')  
     if os.path.exists(sound_file):
         try:
-            subprocess.Popen(['mpg123', sound_file])
+            subprocess.Popen(['mpg123', sound_file], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
             logger.log(f"Error playing sound {sound_file}: {e}")
     else:

@@ -6,22 +6,27 @@ from random import randint
 from turtle import forward
 from typing import Callable
 import RPi.GPIO as GPIO
-from gpiozero import DistanceSensor
+#from gpiozero import Device, DistanceSensor
+#from gpiozero.pins.native import NativeFactory
 from core import logger, interface
 import time 
 
-RECEIVER_PIN = 5  # gpio pin for photoresistive divider. 
+RECEIVER_PIN = 15 # gpio pin for photoresistive divider. 
 MIN_DISTANCE = 80 #dm
 TIME_THRESHOLD = 10 #secs
-# GPIO Setup
-GPIO.setmode(GPIO.BCM)
 
-distance_front_sensor = DistanceSensor(echo=19, trigger=26)
+def gpio_setup(): 
+   # GPIO Setup
+   GPIO.setmode(GPIO.BCM)
+   GPIO.setup(RECEIVER_PIN, GPIO.IN)
+   distance_front_sensor = DistanceSensor(echo=19, trigger=26)
+
+#Device.pin_factory = NativeFactory()
+
 #distance_back_sensor = DistanceSensor(echo=XXX, trigger=YYY)
 #distance_left_sensor = DistanceSensor(echo=XXX, trigger=YYY)
 #distance_right_sensor = DistanceSensor(echo=XXX, trigger=YYY)
 
-GPIO.setup(RECEIVER_PIN, GPIO.IN)
 
 def set_lightbar_callback(func:Callable):
    GPIO.add_event_detect(RECEIVER_PIN, GPIO.BOTH, callback=func, bouncetime=200)
@@ -31,20 +36,14 @@ def cleanup():
    GPIO.cleanup()
    #test
 
-def get_system_status():
-   # Hier könnt ihr Sensoren lesen – als Platzhalter:
-   return {
-       'trash_detected': detect_trash(),
-       'distance': get_ultrasound_distance(),
-       'battery_level': 76  # Beispielwert
-   }
 def detect_trash():
    # TODO: Anbindung an CV-Modul
    return False
 
 def get_ultrasound_distance(round2n=True):#currently front only.
    # TODO: Werte vom Sensor lesen
-   distance = distance_front_sensor.distance * 100  # Umwandlung in cm
+   distance = 0
+   #distance = distance_front_sensor.distance * 100  # Umwandlung in cm
    logger.log(f"Measured Distance: {distance:.2f} cm")
    if round2n:
       return round(distance, 2)  # cm

@@ -6,6 +6,19 @@ autonomous_mode_enabled = False
 stop_flag = threading.Event()
 trash_count = 0
 
+
+def get_system_status():
+   # Hier könnt ihr Sensoren lesen – als Platzhalter:
+   return {
+       'trash_detected': 0,
+       'distance': core.robot_control.get_ultrasound_distance(round2n=True),  # Beispielwert
+       'battery_level': 76,  # Beispielwert
+       'is_autonomous': 0,
+       'message': "", 
+        'total': 1000, 
+   }
+
+
 def app_main(): 
     """
     executed after djangos ready hook is triggered. should not block too long.
@@ -23,7 +36,6 @@ def app_main():
     
     #amd set callback for beam: 
 
-    core.robot_control.set_lightbar_callback(lightbar_callback)
 
 def lightbar_callback(): 
     core.play_sound_safecast("thanks") #thank user when throwing something in
@@ -34,7 +46,9 @@ def lightbar_callback():
 def app_worker():
     #since some of the movement functions include blocking features, 
     #they should be called from this seperate thread. 
-    
+    core.robot_control.setup_gpio()
+    core.robot_control.set_lightbar_callback(lightbar_callback)
+    print("Worker thread started.") 
     while not stop_flag.is_set(): 
         while autonomous_mode_enabled:
             #drive autonomously.
@@ -42,8 +56,12 @@ def app_worker():
         else:
             #do nothing. 
             pass
+    print("Worker thread stopping.")
     worker_cleanup()
     return
 
-def worker_cleanup(): 
+def worker_cleanup():
+    core.robot_control.cleanup() 
+    core.logger.log("Worker thread cleaned up and stopped.", lvl=20)
+    core.sound.play_sound_safecast("STOP")
     pass
