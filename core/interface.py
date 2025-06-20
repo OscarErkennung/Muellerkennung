@@ -1,3 +1,5 @@
+import traceback
+
 try:
     import serial
 except ImportError:
@@ -118,7 +120,8 @@ def move_robot_safecast_linear(maybe_dir:str, speed:int=70):
 def move_robot_linear(dir:Direction , speed:int=70): 
     """
 
-    """    
+    """
+    print(f"Moving robot linear in direction {dir} to speed {speed}")
     try: 
         assert 0<=speed<=100, "Speed must be between 0 and 100"
         assert type(dir)==Direction, "Invalid direction"
@@ -126,6 +129,9 @@ def move_robot_linear(dir:Direction , speed:int=70):
             assert ser.is_open, "Serial port is not open"
     except AssertionError as e:
         logger.log(f"Assertion Error: {e}", lvl=40)
+        return
+    except AttributeError:
+        # traceback.print_exc()
         return
     
     for i in Motor:
@@ -170,6 +176,7 @@ def rotate_robot(deg:int, speed:int=70):
     1 sec is 124deg°
     -> 
     """
+    print(f"Rotating roboto in direction {deg} to speed {speed}")
     try:
         assert 0 <= speed <= 100, "Speed must be between 0 and 100"
         assert -360 <= deg <=+360, "Angle should not exceed +/-360°."
@@ -177,6 +184,8 @@ def rotate_robot(deg:int, speed:int=70):
             assert ser.is_open, "Serial port is not open"
     except AssertionError as e:
         logger.log(f"Assertion Error: {e}", lvl=40)
+        return
+    except AttributeError:
         return
     
     move_robot_linear(Direction.rotate_cw, 100) if deg>0 else move_robot_linear(Direction.rotate_ccw, 100)

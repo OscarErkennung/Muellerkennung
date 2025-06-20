@@ -20,6 +20,7 @@ class DistanceSensor:
     def __init__(self, echo, trigger):
         self.echo = echo
         self.trigger = trigger
+        self.distance = 1000
 
 class Serial:
     def __init__(self, port, baudrate, timeout):
