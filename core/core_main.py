@@ -94,7 +94,6 @@ class RobotStatus:
         def clear_trash_detected():
             """ Helper method to clear trash detected after 10 seconds """
             thrash_consumed = self._trash_consumed_count
-            core.screen.set_image(label)
             time.sleep(TRASH_CONSUMPTION_TIMEOUT)
 
             with self._lock:
@@ -106,6 +105,7 @@ class RobotStatus:
             self._trash_found_count += 1
             self._message = f"Trash #{self._trash_found_count} detected"
             self._trash_detected = True
+            core.screen.set_image(label)
             threading.Thread(target=clear_trash_detected).start()
 
     def handle_trash_thrown(self):
@@ -113,6 +113,8 @@ class RobotStatus:
             self._message = f"Trash #{self._trash_consumed_count} has been consumed"
             self._trash_consumed_count += 1
             self._trash_detected = False
+        core.screen.set_image("face")
+
     def to_json(self):
         status = {
             "trash_detected": self._trash_detected,
@@ -166,7 +168,7 @@ def app_main():
 
 def lightbar_callback(shared_status: RobotStatus, channel): 
     global last_lightbar_callback
-    if(time.time()-last_lightbar_callback <  TRASH_CONSUMPTION_TIMEOUT):
+    if time.time()-last_lightbar_callback <  TRASH_CONSUMPTION_TIMEOUT:
         print("ignoring recent callback.")
         return
     print("interrupt from lightbar detected.")

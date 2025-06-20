@@ -9,7 +9,7 @@ import numpy as np
 from datetime import datetime
 
 DETECTION_INTERVAL = 0.5  # seconds
-MAX_BILDER = 100
+MAX_BILDER = 10
 
 MODEL_PATH = "mobile_net_v2_2025-06-19_15:30:28.718971_quantized.tflite"
 OUTPUT_DIR = "tmp"
@@ -18,6 +18,7 @@ LABELS = ["notrash", "paper", "plastic", "trash"]
 
 
 def camera_worker():
+    print("Starting camera worker thread")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     interpreter = tflite.Interpreter(model_path=MODEL_PATH)
@@ -33,17 +34,19 @@ def camera_worker():
 
     # Webcam starten (0 = /dev/video0)
     cap = cv2.VideoCapture(0)
-
     if not cap.isOpened():
         # TODO: proper exception handling / communicate this to the display.
         logger.log("failed to open the webcam", lvl=50)
         exit()
+    logger.log("Camera opened")
+    print("Camera opened")
 
     try:
         while not core_main.stop_flag.is_set():
             ret, frame = cap.read()
             if not ret:
                 logger.log("failed to read the camera image", lvl=40)
+                print("Failed to read the camera image")
                 continue
 
             # Zeitstempel für Dateinamen
@@ -56,7 +59,7 @@ def camera_worker():
             # Bild vorbereiten
             img = cv2.resize(frame, (width, height))
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            input_data = np.expand_dims(img.astype(np.float32), axis=0)
+            input_data = np.expand_dims(img.astype(np.float32) / 255.0, axis=0) # Division by 255 to normalize model input
 
             # Modell ausführen
             interpreter.set_tensor(input_index, input_data)
@@ -67,7 +70,8 @@ def camera_worker():
             label = LABELS[predicted_index]
             logger.log(
                 f"model output: {output_data[0]}; label: {label}", lvl=20)
-
+            print(
+                f"model output: {output_data[0]}; label: {label}")
             if label != "notrash":
                 try:
                     core_main.our_status.handle_trash_found(label)
