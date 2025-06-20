@@ -17,7 +17,7 @@
 </style>
 <script>
   setInterval(() => {
-    fetch('/get-status/')
+    fetch('/get_status/')
       .then(response => response.json())
       .then(data => {
         document.getElementById('status').innerText = data.status;

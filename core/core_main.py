@@ -47,7 +47,7 @@ def app_main():
     # start subthread....
     worker_thread = threading.Thread(target=app_worker, args={our_status})
     worker_thread.daemon = True
-    worker_thread.start
+    worker_thread.start()
     # TODO start subthread for camera
     #camera_thread = threading.Thread(target=camera_worker, args={})
     #camera_thread.daemon = True
@@ -64,11 +64,11 @@ def lightbar_callback(shared_status: RobotStatus):
 def app_worker(shared_status: RobotStatus):
     #since some of the movement functions include blocking features, 
     #they should be called from this seperate thread. 
-    core.robot_control.setup_gpio()
-    core.robot_control.set_lightbar_callback(lightbar_callback, args=(shared_status,))  # Set the callback for the lightbar
+    core.robot_control.gpio_setup()
+    core.robot_control.set_lightbar_callback(lightbar_callback)  # Set the callback for the lightbar
     print("Worker thread started.") 
     while not stop_flag.is_set(): 
-        while shared_status.getstate()['is_autonomous']:
+        while shared_status.getstate()['is_autonomous']: #TODO should be a view.
             #drive autonomously.
             core.robot_control.move_autonomous()
         else:
@@ -85,7 +85,7 @@ def sensor_worker(shared_status: RobotStatus, stop_flag: threading.Event):
     while not stop_flag.is_set():
         # Read sensors and update shared_status
         distance = core.robot_control.get_ultrasound_distance(round2n=True)
-        get
+        
         # Update the shared status with the new distance
         shared_status.update_status({'distance': distance})
         # Sleep for a short duration to avoid busy waiting

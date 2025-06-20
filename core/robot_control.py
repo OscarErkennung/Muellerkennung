@@ -6,8 +6,8 @@ from random import randint
 from turtle import forward
 from typing import Callable
 import RPi.GPIO as GPIO
-#from gpiozero import Device, DistanceSensor
-#from gpiozero.pins.native import NativeFactory
+from gpiozero import Device, DistanceSensor
+from gpiozero.pins.native import NativeFactory
 from core import logger, interface
 import time 
 
