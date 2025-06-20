@@ -15,6 +15,7 @@ __pycache__
 *.bak
 *.orig
 activate/
+.venv
 **/__pycache__
 startup_log.txt
 webcam_log.txt
