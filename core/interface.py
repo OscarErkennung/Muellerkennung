@@ -157,7 +157,7 @@ def move_robot_angular_safecast(deg:float, speed:int=70):
     time.sleep(round(), 2)  # Allow time for the command to be processed
     ser.flush()
 
-def rotate_robot_cw(deg:int, speed:int=70):
+def rotate_robot(deg:int, speed:int=70):
     """
     Rotate the robot clockwise.
 
@@ -166,19 +166,20 @@ def rotate_robot_cw(deg:int, speed:int=70):
     """
     try:
         assert 0 <= speed <= 100, "Speed must be between 0 and 100"
+        assert -360 <= deg <=+360, "Angle should not exceed +/-360°."
         if not DEBUG_FLAG:
             assert ser.is_open, "Serial port is not open"
     except AssertionError as e:
         logger.log(f"Assertion Error: {e}", lvl=40)
         return
     
-    move_robot_linear(Direction.rotate_cw, 100)
+    move_robot_linear(Direction.rotate_cw, 100) if deg>0 else move_robot_linear(Direction.ccw, 100)
     time.sleep(deg/CALIBRATION_VALUE) #drehe über steuerbord.
     move_robot_linear(Direction.stop, 0)
     return
 if __name__ == "__main__":
     interface_setup()
-    rotate_robot_cw(360, 70)
+    rotate_robot(360, 70)
     #move_robot(Direction.forward, 70)
     #time.sleep(1)
     #move_robot(Direction.backward, 70)

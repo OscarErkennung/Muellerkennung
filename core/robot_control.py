@@ -1,11 +1,18 @@
 # robot_control.py
 # import serial
 # Beispiel: Serieller Port
+from bdb import Breakpoint
+from random import randint
+from turtle import forward
+from typing import Callable
 import RPi.GPIO as GPIO
 from gpiozero import DistanceSensor
-from core import logger
-import time
+from core import logger, interface
+import time 
 
+RECEIVER_PIN = 5  # gpio pin for photoresistive divider. 
+MIN_DISTANCE = 80 #dm
+TIME_THRESHOLD = 10 #secs
 # GPIO Setup
 GPIO.setmode(GPIO.BCM)
 
@@ -14,15 +21,17 @@ distance_front_sensor = DistanceSensor(echo=19, trigger=26)
 #distance_left_sensor = DistanceSensor(echo=XXX, trigger=YYY)
 #distance_right_sensor = DistanceSensor(echo=XXX, trigger=YYY)
 
+GPIO.setup(RECEIVER_PIN, GPIO.IN)
+
+def set_lightbar_callback(func:Callable):
+   GPIO.add_event_detect(RECEIVER_PIN, GPIO.BOTH, callback=func, bouncetime=200)
+
 
 def cleanup():
    GPIO.cleanup()
    #test
 
-def set_autonomous_mode(enabled):
-   #arduino.write(b'A1' if enabled else b'A0')
-   pass
-def get_status():
+def get_system_status():
    # Hier könnt ihr Sensoren lesen – als Platzhalter:
    return {
        'trash_detected': detect_trash(),
@@ -32,6 +41,7 @@ def get_status():
 def detect_trash():
    # TODO: Anbindung an CV-Modul
    return False
+
 def get_ultrasound_distance(round2n=True):#currently front only.
    # TODO: Werte vom Sensor lesen
    distance = distance_front_sensor.distance * 100  # Umwandlung in cm
@@ -41,7 +51,34 @@ def get_ultrasound_distance(round2n=True):#currently front only.
    else:
       return distance  # cm
 
-
+def move_autonomous():
+   while(True): # -> only call in a breakable loop. 
+      #setup
+      interface.move_robot_linear(interface.Direction.forward)
+      start_time = time.now()
+      reason =""
+      #move forward until we have to do something. 
+      while True: 
+         if(get_ultrasound_distance()<=MIN_DISTANCE): 
+            reason="distance"
+            break 
+         if(time.now()-start_time)>=TIME_THRESHOLD:#cm 
+            reason="time" 
+            break
+      ##stop
+      interface.move_robot_linear(interface.Direction.stop)
+      ## Change direction
+      match reason: 
+         case "time":
+            # turn randomly to cover free area.
+            interface.rotate_robot(30, 50)
+            break
+         case "distance":
+            #we see a wall, turn roomba style. 
+            random_direction = randint(-60, 60)
+            interface.move_robot_linear(random_direction)
+            break          
+   
 if __name__ == "__main__": 
    try:
        while True:
