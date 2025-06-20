@@ -1,4 +1,6 @@
-from core import logger
+import traceback
+
+from core import logger, core_main
 import cv2
 import time
 import os
@@ -15,7 +17,7 @@ OUTPUT_DIR = "tmp"
 LABELS = ["notrash", "trash"]
 
 
-def camera_worker(detected_callback):
+def camera_worker():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     interpreter = tflite.Interpreter(model_path=MODEL_PATH)
@@ -38,7 +40,7 @@ def camera_worker(detected_callback):
         exit()
 
     try:
-        while True:
+        while not core_main.stop_flag.is_set():
             ret, frame = cap.read()
             if not ret:
                 logger.log("failed to read the camera image", lvl=40)
@@ -67,7 +69,11 @@ def camera_worker(detected_callback):
                 f"model output: {output_data[0][0]:.4f}; label: {label}", lvl=20)
 
             if label == "trash":
-                detected_callback()
+                try:
+                    core_main.our_status.handle_trash_found()
+                except:
+                    traceback.print_exc()
+                    logger.log(f"Error handling trash found event...")
 
             # Bilderliste neu laden und nach Änderungszeit sortieren
             bilder = sorted(
