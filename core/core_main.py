@@ -1,8 +1,7 @@
 #!/bin/python
 import signal
 from http.client import REQUEST_URI_TOO_LONG
-import os, time, threading, core.interface, core.logger, core.robot_control, core.sound
-
+import os,json, time, threading, core.interface, core.logger, core.robot_control, core.sound
 
 TRASH_CONSUMPTION_TIMEOUT = 10
 
@@ -16,6 +15,7 @@ def stop_signal_handler(sig, frame):
         print("Stopping CORE")
     global stop_flag
     stop_flag.set()
+    exit()
 
 signal.signal(signal.SIGINT, stop_signal_handler)
 
@@ -99,7 +99,17 @@ class RobotStatus:
             self._message = f"Trash #{self._trash_consumed_count} has been consumed"
             self._trash_detected = False
 
-
+    def to_json(self):
+        status = {
+            "trash_detected": self._trash_detected,
+            "distance": self._distance,
+            "battery_level": self._battery_level,
+            "is_autonomous": self._is_autonomous,
+            "message": self._message,
+            "trash_found_count": self._trash_found_count,
+            "trash_consumed_count": self._trash_consumed_count
+        }
+        return json.dumps(status)
 
 our_status = RobotStatus()
 
@@ -107,24 +117,27 @@ def get_system_status():
     """
     Returns the current system status as a dictionary.
     """
-    global our_status
-    return our_status
-
+    return our_status.to_json()
 def app_main(): 
     """
     executed after djangos ready hook is triggered. should not block too long.
     """
     #perform startup sequences.
     core.sound.play_sound_safecast("START")
-    # start subthread....
+    # start subthreads....
     worker_thread = threading.Thread(target=app_worker, args={our_status})
     worker_thread.daemon = True
     worker_thread.start()
+    
+    sensor_thread = threading.Thread(target=sensor_worker, args={our_status})
+    sensor_thread.daemon = True
+    sensor_thread.start()
+    
     # TODO start subthread for camera
-    from webcam import camera_worker
+    from core.webcam import camera_worker
     camera_thread = threading.Thread(target=camera_worker, args={})
     camera_thread.daemon = True
-    camera_thread.start()
+    #camera_thread.start()
     
     #amd set callback for beam: 
 
@@ -152,7 +165,7 @@ def app_worker(shared_status: RobotStatus):
     worker_cleanup()
     return
 
-def sensor_worker(shared_status: RobotStatus, stop_flag: threading.Event):
+def sensor_worker(shared_status: RobotStatus):
     """
     This worker thread is responsible for reading sensors and updating the shared status.
     """

@@ -9,7 +9,7 @@ import RPi.GPIO as GPIO
 from gpiozero import Device, DistanceSensor
 from gpiozero.pins.native import NativeFactory
 from core import logger, interface
-import core_main
+import core.core_main
 import time
 from functools import partial 
 
@@ -32,6 +32,7 @@ def gpio_setup():
    GPIO.setup(RECEIVER_PIN, GPIO.IN)
 
    #Device.pin_factory = NativeFactory()  # Use native GPIO pins 
+   global distance_front_sensor
    distance_front_sensor = DistanceSensor(echo=19, trigger=26)
 
 
@@ -54,13 +55,14 @@ def cleanup():
 
 
 def get_ultrasound_distance(round2n=True):  # currently front only.
-    # TODO: Werte vom Sensor lesen
-    distance = distance_front_sensor.distance * 100  # Umwandlung in cm
-    logger.log(f"Measured Distance: {distance:.2f} cm")
-    if round2n:
-        return round(distance, 2)  # cm
-    else:
-        return distance  # cm
+   # TODO: Werte vom Sensor lesen
+   global distance_front_sensor
+   distance = distance_front_sensor.distance * 100  # Umwandlung in cm
+   logger.log(f"Measured Distance: {distance:.2f} cm")
+   if round2n:
+      return round(distance, 2)  # cm
+   else:
+      return distance  # cm
 
 
 def move_autonomous():

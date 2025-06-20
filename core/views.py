@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+import json
 
 # Create your views here.
 from django.shortcuts import render, redirect
@@ -22,16 +23,10 @@ def steuerung(request):
            autonomous = not autonomous
            core_main.autonomous_mode_enabled = autonomous
            message = "Modus geändert"
-   status =  core_main.get_system_status()#! add back get_system_status() #todo move dict conversion into get_status / remove double keys.
-   return render(request, 'steuerung.html', {
-       'trash_detected': status['trash_detected'],
-       'distance': status['distance'],
-       'battery_level': status['battery_level'],
-       'is_autonomous': status['is_autonomous'],
-       'message': status['message'],
-        'total': status['total']
-   })
+   status =  core_main.get_system_status()#todo move dict conversion into get_status / remove double keys.
+    
+   return render(request, 'steuerung.html',json.loads(status))
 
 def get_status(request): 
     
-    return JsonResponse(core_main.get_system_status())
+    return JsonResponse(core_main.get_system_status(), safe=False)
