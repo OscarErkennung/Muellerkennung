@@ -159,7 +159,7 @@ def app_main():
     from core.webcam import camera_worker
     camera_thread = threading.Thread(target=camera_worker, args={})
     camera_thread.daemon = True
-    #camera_thread.start()
+    camera_thread.start()
 
     # amd set callback for beam:
     # camera_thread.start()
