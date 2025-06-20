@@ -1,6 +1,12 @@
 import subprocess, os
 
+last_process = None
 
 def set_image(name: str):
-    return
-    subprocess.run(f"feh --fullscreen --auto-zoom ./images/{name}.png")
+    global last_process
+    if last_process:
+        last_process.terminate()
+        last_process.wait()
+
+
+    last_process = subprocess.Popen(["feh", "--fullscreen", "--auto-zoom", "./images/{name}.png"])
