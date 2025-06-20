@@ -28,7 +28,7 @@ DEBUG = True
 #UNCOMMENT FOR ALLOWING LOCAL HOSTS ONLY
 #ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
 #UNCOMMENT FOR ALLOWING ANY HOSTS
-ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
+ALLOWED_HOSTS = ['*']  # Allow all hosts for development purposes
 #END Change ~JS
 
 # Application definition

@@ -33,5 +33,5 @@ def steuerung(request):
    })
 
 def get_status(request): 
-
-    return JsonResponse({})
+    
+    return JsonResponse(core_main.get_status())

@@ -15,14 +15,16 @@ RECEIVER_PIN = 15 # gpio pin for photoresistive divider.
 MIN_DISTANCE = 80 #dm
 TIME_THRESHOLD = 10 #secs
 
+distance_front_sensor = None
+
 def gpio_setup(): 
    # GPIO Setup
    GPIO.setmode(GPIO.BCM)
    GPIO.setup(RECEIVER_PIN, GPIO.IN)
+   global distance_front_sensor 
    distance_front_sensor = DistanceSensor(echo=19, trigger=26)
 
 #Device.pin_factory = NativeFactory()
-
 #distance_back_sensor = DistanceSensor(echo=XXX, trigger=YYY)
 #distance_left_sensor = DistanceSensor(echo=XXX, trigger=YYY)
 #distance_right_sensor = DistanceSensor(echo=XXX, trigger=YYY)
@@ -42,8 +44,7 @@ def detect_trash():
 
 def get_ultrasound_distance(round2n=True):#currently front only.
    # TODO: Werte vom Sensor lesen
-   distance = 0
-   #distance = distance_front_sensor.distance * 100  # Umwandlung in cm
+   distance = distance_front_sensor.distance * 100  # Umwandlung in cm
    logger.log(f"Measured Distance: {distance:.2f} cm")
    if round2n:
       return round(distance, 2)  # cm
