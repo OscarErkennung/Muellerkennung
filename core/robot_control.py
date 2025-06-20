@@ -9,29 +9,38 @@ import RPi.GPIO as GPIO
 from gpiozero import Device, DistanceSensor
 from gpiozero.pins.native import NativeFactory
 from core import logger, interface
-import time 
+import time
+from functools import partial 
 
-RECEIVER_PIN = 15 # gpio pin for photoresistive divider. 
+RECEIVER_PIN = 7 # gpio pin for photoresistive divider. 
 MIN_DISTANCE = 80 #dm
 TIME_THRESHOLD = 10 #secs
 
 distance_front_sensor = None
+gpio_is_setup = False
 
 def gpio_setup(): 
+   global gpio_is_setup
+   global distance_front_sensor 
+   if gpio_is_setup:
+      logger.log("GPIO already set up, skipping setup.", lvl=20)
+      return
+   gpio_is_setup = True
    # GPIO Setup
    GPIO.setmode(GPIO.BCM)
    GPIO.setup(RECEIVER_PIN, GPIO.IN)
-   global distance_front_sensor 
+
+   #Device.pin_factory = NativeFactory()  # Use native GPIO pins 
    distance_front_sensor = DistanceSensor(echo=19, trigger=26)
 
-#Device.pin_factory = NativeFactory()
-#distance_back_sensor = DistanceSensor(echo=XXX, trigger=YYY)
-#distance_left_sensor = DistanceSensor(echo=XXX, trigger=YYY)
 #distance_right_sensor = DistanceSensor(echo=XXX, trigger=YYY)
 
 
-def set_lightbar_callback(func:Callable):
-   GPIO.add_event_detect(RECEIVER_PIN, GPIO.BOTH, callback=func, bouncetime=200)
+def set_lightbar_callback(func:Callable, args=None):
+   partial_func = partial(func, args) if args else func
+   if not gpio_is_setup:
+      gpio_setup()
+   GPIO.add_event_detect(RECEIVER_PIN, GPIO.BOTH, callback=partial_func, bouncetime=200)
 
 
 def cleanup():
@@ -79,18 +88,18 @@ def move_autonomous():
             interface.move_robot_linear(random_direction)
             break          
    
-if __name__ == "__main__": 
-   try:
-       while True:
-           distance = distance_front_sensor.distance * 100  # Umwandlung in cm
-           print(f"Distance: {distance:.2f} cm")
-           time.sleep(1)
-   except KeyboardInterrupt:
-       print("Measurement stopped by User")
-       GPIO.cleanup()
-   except Exception as e:
-       print(f"An error occurred: {e}")
-       GPIO.cleanup()
-   else: 
-      #we are a module. 
-      pass
+#if __name__ == "__main__": 
+   #try:
+       #while True:
+           #distance = distance_front_sensor.distance * 100  # Umwandlung in cm
+           #print(f"Distance: {distance:.2f} cm")
+           #time.sleep(1)
+   #except KeyboardInterrupt:
+       #print("Measurement stopped by User")
+       #GPIO.cleanup()
+   #except Exception as e:
+       #print(f"An error occurred: {e}")
+       #GPIO.cleanup()
+   #else: 
+      ##we are a module. 
+      #pass

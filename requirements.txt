@@ -4,3 +4,7 @@ pyserial==3.5
 PyYAML==6.0.2
 RPi.GPIO==0.7.1
 sqlparse==0.5.3
+gpiozero==2.0.1
+lgpio==0.2.2.0
+pigpio==1.78
+rpi-lgpio==0.6

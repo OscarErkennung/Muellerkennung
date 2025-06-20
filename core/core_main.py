@@ -65,7 +65,8 @@ def app_worker(shared_status: RobotStatus):
     #since some of the movement functions include blocking features, 
     #they should be called from this seperate thread. 
     core.robot_control.gpio_setup()
-    core.robot_control.set_lightbar_callback(lightbar_callback)  # Set the callback for the lightbar
+    time.sleep(2)  # Wait for GPIO setup to complete
+    core.robot_control.set_lightbar_callback(lightbar_callback, shared_status)  # Set the callback for the lightbar
     print("Worker thread started.") 
     while not stop_flag.is_set(): 
         while shared_status.getstate()['is_autonomous']: #TODO should be a view.
