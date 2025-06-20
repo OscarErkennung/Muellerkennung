@@ -8,7 +8,7 @@ from datetime import datetime
 # Maximal erlaubte Anzahl von Bildern
 MAX_BILDER = 100
  
-MODEL_PATH = "mobile_net_v2_2025-06-19_11:45:29.873886.tflite"
+MODEL_PATH = "mobile_net_v2_2025-06-19_15:30:28.718971_quantized.tflite"
 output_dir = "tmp"
 os.makedirs(output_dir, exist_ok=True)
  
@@ -48,15 +48,9 @@ try:
 
 	    # Bild vorbereiten
         img = cv2.resize(frame, (width, height))
-        # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        debug_filename = os.path.join(f"debug/input_{timestamp}.jpg")
-        cv2.imwrite(debug_filename, img)  # Achtung: Werte müssen zwischen 0-255 sein
-        
-        input_data = img.astype(np.float32) / 255.0
-        input_data = np.expand_dims(input_data, axis=0)
-        
-      
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        input_data = np.expand_dims(img.astype(np.float32), axis=0)
+              
         # Modell ausführen
         interpreter.set_tensor(input_index, input_data)
         interpreter.invoke()
