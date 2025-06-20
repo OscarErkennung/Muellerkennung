@@ -13,7 +13,7 @@ import core.core_main
 import time
 from functools import partial 
 
-RECEIVER_PIN = 15  # gpio pin for photoresistive divider.
+RECEIVER_PIN = 17  # gpio pin for photoresistive divider.
 MIN_DISTANCE = 80  # dm
 TIME_THRESHOLD = 10  # secs
 

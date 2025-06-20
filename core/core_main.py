@@ -8,7 +8,7 @@ TRASH_CONSUMPTION_TIMEOUT = 10
 autonomous_mode_enabled = False
 stop_flag = threading.Event()
 trash_count = 0
-
+last_lightbar_callback = 0
 
 def stop_signal_handler(sig, frame):
     if os.environ.get("RUN_MAIN") == "true":
@@ -97,6 +97,7 @@ class RobotStatus:
     def handle_trash_thrown(self):
         with self.lock:
             self._message = f"Trash #{self._trash_consumed_count} has been consumed"
+            self._trash_consumed_count += 1
             self._trash_detected = False
 
     def to_json(self):
@@ -142,8 +143,14 @@ def app_main():
     #amd set callback for beam: 
 
 
-def lightbar_callback(shared_status: RobotStatus): 
-    core.play_sound_safecast("thanks") #thank user when throwing something in
+def lightbar_callback(shared_status: RobotStatus, channel): 
+    global last_lightbar_callback
+    if(time.time()-last_lightbar_callback <  TRASH_CONSUMPTION_TIMEOUT):
+        print("ignoring recent callback.")
+        return
+    print("interrupt from lightbar detected.")
+    last_lightbar_callback = time.time()
+    core.sound.play_sound_safecast("thanks") #thank user when throwing something in
     shared_status.handle_trash_thrown()
 
 
