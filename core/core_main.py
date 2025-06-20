@@ -14,6 +14,7 @@ import core.screen
 TRASH_CONSUMPTION_TIMEOUT = 10
 
 autonomous_mode_enabled = False
+
 stop_flag = threading.Event()
 trash_count = 0
 last_lightbar_callback = 0
