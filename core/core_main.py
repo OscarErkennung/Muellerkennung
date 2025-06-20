@@ -1,7 +1,14 @@
 #!/bin/python
 import signal
 from http.client import REQUEST_URI_TOO_LONG
-import os, time, threading, core.interface, core.logger, core.robot_control, core.sound
+import os
+import time
+import threading
+import core.interface
+import core.logger
+import core.robot_control
+import core.sound
+import core.screen
 
 
 TRASH_CONSUMPTION_TIMEOUT = 10
@@ -17,11 +24,13 @@ def stop_signal_handler(sig, frame):
     global stop_flag
     stop_flag.set()
 
+
 signal.signal(signal.SIGINT, stop_signal_handler)
 
 
 class RobotStatus:
     status = {}
+
     def __init__(self):
         self._trash_detected = False
         self._distance = -1
@@ -78,15 +87,18 @@ class RobotStatus:
     def get_trash_consumed_count(self):
         return self._trash_consumed_count
 
-    def handle_trash_found(self):
+    def handle_trash_found(self, label: str):
 
         def clear_trash_detected():
             """ Helper method to clear trash detected after 10 seconds """
             thrash_consumed = self._trash_consumed_count
+            core.screen.set_image(label)
             time.sleep(TRASH_CONSUMPTION_TIMEOUT)
+
             with self._lock:
                 if self._trash_detected and self._trash_consumed_count == thrash_consumed:
                     self._trash_detected = False
+            core.screen.set_image("face")
 
         with self.lock:
             self._trash_found_count += 1
@@ -98,10 +110,11 @@ class RobotStatus:
         with self.lock:
             self._message = f"Trash #{self._trash_consumed_count} has been consumed"
             self._trash_detected = False
-
+        core.screen.set_image("face")
 
 
 our_status = RobotStatus()
+
 
 def get_system_status():
     """
@@ -110,12 +123,14 @@ def get_system_status():
     global our_status
     return our_status
 
-def app_main(): 
+
+def app_main():
     """
     executed after djangos ready hook is triggered. should not block too long.
     """
-    #perform startup sequences.
+    # perform startup sequences.
     core.sound.play_sound_safecast("START")
+    core.screen.set_image("face")
     # start subthread....
     worker_thread = threading.Thread(target=app_worker, args={our_status})
     worker_thread.daemon = True
@@ -125,32 +140,34 @@ def app_main():
     camera_thread = threading.Thread(target=camera_worker, args={})
     camera_thread.daemon = True
     camera_thread.start()
-    
-    #amd set callback for beam: 
+
+    # amd set callback for beam:
 
 
-def lightbar_callback(shared_status: RobotStatus): 
-    core.play_sound_safecast("thanks") #thank user when throwing something in
+def lightbar_callback(shared_status: RobotStatus):
+    core.play_sound_safecast("thanks")  # thank user when throwing something in
     shared_status.handle_trash_thrown()
 
 
 def app_worker(shared_status: RobotStatus):
-    #since some of the movement functions include blocking features, 
-    #they should be called from this seperate thread. 
+    # since some of the movement functions include blocking features,
+    # they should be called from this seperate thread.
     core.robot_control.gpio_setup()
     time.sleep(2)  # Wait for GPIO setup to complete
-    core.robot_control.set_lightbar_callback(lightbar_callback, shared_status)  # Set the callback for the lightbar
-    print("Worker thread started.") 
-    while not stop_flag.is_set(): 
-        while shared_status.get_is_autonomous(): # TODO: should be a view
-            #drive autonomously.
+    core.robot_control.set_lightbar_callback(
+        lightbar_callback, shared_status)  # Set the callback for the lightbar
+    print("Worker thread started.")
+    while not stop_flag.is_set():
+        while shared_status.get_is_autonomous():  # TODO: should be a view
+            # drive autonomously.
             core.robot_control.move_autonomous()
         else:
-            #do nothing. 
-            time.sleep(1) #sleep to avoid busy waiting
+            # do nothing.
+            time.sleep(1)  # sleep to avoid busy waiting
     print("Worker thread stopping.")
     worker_cleanup()
     return
+
 
 def sensor_worker(shared_status: RobotStatus, stop_flag: threading.Event):
     """
@@ -167,7 +184,7 @@ def sensor_worker(shared_status: RobotStatus, stop_flag: threading.Event):
 
 
 def worker_cleanup():
-    core.robot_control.cleanup() 
+    core.robot_control.cleanup()
     core.logger.log("Worker thread cleaned up and stopped.", lvl=20)
     core.sound.play_sound_safecast("STOP")
     pass

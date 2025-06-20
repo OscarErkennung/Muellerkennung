@@ -8,13 +8,13 @@ import ai_edge_litert.interpreter as tflite
 import numpy as np
 from datetime import datetime
 
-# Maximal erlaubte Anzahl von Bildern
+DETECTION_INTERVAL = 0.5  # seconds
 MAX_BILDER = 100
 
 MODEL_PATH = "mobile_net_v2_2025-06-19_15:30:28.718971_quantized.tflite"
 OUTPUT_DIR = "tmp"
 
-LABELS = ["notrash", "trash"]
+LABELS = ["notrash", "paper", "plastic", "trash"]
 
 
 def camera_worker():
@@ -63,17 +63,17 @@ def camera_worker():
             interpreter.invoke()
             output_data = interpreter.get_tensor(output_index)
 
-            predicted_index = int(round(output_data[0][0]))
+            predicted_index = np.argmax(output_data[0])
             label = LABELS[predicted_index]
             logger.log(
-                f"model output: {output_data[0][0]:.4f}; label: {label}", lvl=20)
+                f"model output: {output_data[0]}; label: {label}", lvl=20)
 
-            if label == "trash":
+            if label != "notrash":
                 try:
-                    core_main.our_status.handle_trash_found()
+                    core_main.our_status.handle_trash_found(label)
                 except:
                     traceback.print_exc()
-                    logger.log(f"Error handling trash found event...")
+                    logger.log("Error handling trash found event...")
 
             # Bilderliste neu laden und nach Änderungszeit sortieren
             bilder = sorted(
@@ -86,7 +86,7 @@ def camera_worker():
                 zu_loeschen = bilder.pop(0)
                 os.remove(os.path.join(OUTPUT_DIR, zu_loeschen))
 
-            time.sleep(0.5)
+            time.sleep(DETECTION_INTERVAL)
 
     finally:
         cap.release()
