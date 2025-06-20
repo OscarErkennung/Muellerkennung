@@ -13,7 +13,9 @@ import core.core_main
 import time
 from functools import partial 
 
-RECEIVER_PIN = 17  # gpio pin for photoresistive divider.
+RECEIVER_PIN1 = 17  # gpio pin for photoresistive divider.
+RECEIVER_PIN2 = 27  # gpio pin for photoresistive divider.
+RECEIVER_PIN3 = 22  # gpio pin for photoresistive divider.
 MIN_DISTANCE = 80  # dm
 TIME_THRESHOLD = 10  # secs
 
@@ -29,7 +31,7 @@ def gpio_setup():
    gpio_is_setup = True
    # GPIO Setup
    GPIO.setmode(GPIO.BCM)
-   GPIO.setup(RECEIVER_PIN, GPIO.IN)
+   GPIO.setup([RECEIVER_PIN1, RECEIVER_PIN2, RECEIVER_PIN3], GPIO.IN)
 
    #Device.pin_factory = NativeFactory()  # Use native GPIO pins 
    global distance_front_sensor
@@ -46,7 +48,9 @@ def set_lightbar_callback(func:Callable, args=None):
    partial_func = partial(func, args) if args else func
    if not gpio_is_setup:
       gpio_setup()
-   GPIO.add_event_detect(RECEIVER_PIN, GPIO.BOTH, callback=partial_func, bouncetime=200)
+   GPIO.add_event_detect(RECEIVER_PIN1, GPIO.BOTH, callback=partial_func, bouncetime=200)
+   GPIO.add_event_detect(RECEIVER_PIN2, GPIO.BOTH, callback=partial_func, bouncetime=200)
+   GPIO.add_event_detect(RECEIVER_PIN3, GPIO.BOTH, callback=partial_func, bouncetime=200)
 
 
 def cleanup():

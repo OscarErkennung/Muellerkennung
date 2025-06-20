@@ -146,12 +146,11 @@ def app_main():
     from core.webcam import camera_worker
     camera_thread = threading.Thread(target=camera_worker, args={})
     camera_thread.daemon = True
-    camera_thread.start()
+    #camera_thread.start()
 
     # amd set callback for beam:
     # camera_thread.start()
 
-    # amd set callback for beam:
 
 
 def lightbar_callback(shared_status: RobotStatus, channel): 
@@ -170,8 +169,8 @@ def app_worker(shared_status: RobotStatus):
     # they should be called from this seperate thread.
     core.robot_control.gpio_setup()
     time.sleep(2)  # Wait for GPIO setup to complete
-    core.robot_control.set_lightbar_callback(
-        lightbar_callback, shared_status)  # Set the callback for the lightbar
+    core.robot_control.set_lightbar_callback(lightbar_callback, shared_status)  # Set the callback for the lightbar
+    
     print("Worker thread started.")
     while not stop_flag.is_set():
         while shared_status.get_is_autonomous():  # TODO: should be a view
