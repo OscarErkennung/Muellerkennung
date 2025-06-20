@@ -56,9 +56,11 @@ def move_autonomous():
     # setup
     interface.move_robot_linear(interface.Direction.forward)
     start_time = time.now()
-    reason = ""
     # move forward until we have to do something.
     while True:
+        if get_ultrasound_distance() == -1:
+            reason = "uninitialized"
+            break
         if get_ultrasound_distance() <= MIN_DISTANCE:
             reason = "distance"
             break
@@ -82,7 +84,8 @@ def move_autonomous():
         case "trash":
             # Do nothing
             pass
-
+        case "uninitialized":
+            logger.log("Distance sensor has not yet been read, preventing sensorless autonomous mode!")
 
 if __name__ == "__main__":
     try:
