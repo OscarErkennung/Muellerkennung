@@ -17,7 +17,7 @@ RECEIVER_PIN1 = 17  # gpio pin for photoresistive divider.
 RECEIVER_PIN2 = 27  # gpio pin for photoresistive divider.
 RECEIVER_PIN3 = 22  # gpio pin for photoresistive divider.
 MIN_DISTANCE = 80  # dm
-TIME_THRESHOLD = 5  # secs
+TIME_THRESHOLD = 2  # secs
 
 distance_front_sensor = None
 gpio_is_setup = False
@@ -103,7 +103,12 @@ def move_autonomous():
             # we see a wall, turn roomba style.
             interface.move_robot_linear(interface.Direction.backward, speed=50)
             time.sleep(0.25)
-            interface.rotate_robot(180)
+            random_direction = randint(90, 180)
+            random_vorzeichen = randint(90, 180)
+            if random_vorzeichen % 2 == 0:
+                interface.rotate_robot(random_direction)
+            else:
+                interface.rotate_robot(-random_direction)
         case "trash":
             # Do nothing
             pass
