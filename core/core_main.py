@@ -11,7 +11,7 @@ import core.robot_control
 import core.sound
 import core.screen
 
-TRASH_CONSUMPTION_TIMEOUT = 10
+TRASH_CONSUMPTION_TIMEOUT = 30
 
 autonomous_mode_enabled = False
 
@@ -103,7 +103,16 @@ class RobotStatus:
             with self._lock:
                 if self._trash_detected and self._trash_consumed_count == thrash_consumed:
                     self._trash_detected = False
-            core.screen.set_image("face")
+                    # core.sound.play_sound_safecast("ERROR")
+                    core.screen.set_image("face")
+
+        global last_trash
+        if time.time() - last_trash > 5:
+            core.sound.play_sound_safecast("help_me")
+        last_trash = time.time()
+
+        if self._trash_detected:
+            return
 
         with self.lock:
             self._trash_found_count += 1
@@ -111,10 +120,7 @@ class RobotStatus:
             self._trash_detected = True
         core.screen.set_image(label)
         threading.Thread(target=clear_trash_detected).start()
-        global last_trash
-        if time.time() - last_trash > 5:
-            core.sound.play_sound_safecast("help_me")
-        last_trash = time.time()
+
 
     def handle_trash_thrown(self):
         with self.lock:

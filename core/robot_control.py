@@ -17,7 +17,7 @@ RECEIVER_PIN1 = 17  # gpio pin for photoresistive divider.
 RECEIVER_PIN2 = 27  # gpio pin for photoresistive divider.
 RECEIVER_PIN3 = 22  # gpio pin for photoresistive divider.
 MIN_DISTANCE = 50  # dm
-TIME_THRESHOLD = 2  # secs
+TIME_THRESHOLD = 4  # secs
 
 distance_front_sensor = None
 gpio_is_setup = False
