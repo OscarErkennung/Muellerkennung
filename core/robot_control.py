@@ -93,6 +93,7 @@ def move_autonomous():
             break
     ##stop
     interface.move_robot_linear(interface.Direction.stop)
+    time.sleep(0.5)
     ## Change direction
     match reason:
         case "time":
@@ -101,7 +102,7 @@ def move_autonomous():
             interface.rotate_robot(random_direction, 50)
         case "distance":
             # we see a wall, turn roomba style.
-            interface.move_robot_linear(interface.Direction.backward, speed=50)
+            interface.move_robot_linear(interface.Direction.backward)
             time.sleep(0.25)
             random_direction = randint(90, 180)
             random_vorzeichen = randint(90, 180)

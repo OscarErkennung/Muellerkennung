@@ -13,6 +13,7 @@ ser = None
 
 DEBUG_FLAG:bool = False  # Set to True for debugging, False for production
 CALIBRATION_VALUE = 105
+DEFAULT_SPEED = 30
 
 #interface A,B,C,D = <uint_8t speed>
 
@@ -110,7 +111,7 @@ def interface_cleanup():
     except serial.SerialException as e:
         logger.log(f"Error closing serial port: {e}", lvl=40)
 
-def move_robot_safecast_linear(maybe_dir:str, speed:int=70):
+def move_robot_safecast_linear(maybe_dir:str, speed:int=DEFAULT_SPEED):
     """
     Safely cast the direction and move the robot.
     """
@@ -121,7 +122,7 @@ def move_robot_safecast_linear(maybe_dir:str, speed:int=70):
         logger.log(f"Invalid direction: {maybe_dir}. Error: {e}", lvl=40)
 
 
-def move_robot_linear(dir:Direction , speed:int=70): 
+def move_robot_linear(dir:Direction , speed:int=DEFAULT_SPEED): 
     """
 
     """
@@ -148,7 +149,7 @@ def move_robot_linear(dir:Direction , speed:int=70):
     time.sleep(0.3)  # Allow time for the command to be processed   
     ser.flush()
 
-def move_robot_angular_safecast(deg:float, speed:int=70):
+def move_robot_angular_safecast(deg:float, speed:int=DEFAULT_SPEED):
     """
     Move the robot in a direction based on an angle.
     """
@@ -173,7 +174,7 @@ def move_robot_angular_safecast(deg:float, speed:int=70):
     time.sleep(round(), 2)  # Allow time for the command to be processed
     ser.flush()
 
-def rotate_robot(deg:int, speed:int=70):
+def rotate_robot(deg:int, speed:int=DEFAULT_SPEED):
     """
     Rotate the robot clockwise.
 

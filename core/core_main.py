@@ -105,8 +105,12 @@ class RobotStatus:
             self._trash_found_count += 1
             self._message = f"Trash #{self._trash_found_count} detected"
             self._trash_detected = True
-            core.screen.set_image(label)
-            threading.Thread(target=clear_trash_detected).start()
+        core.screen.set_image(label)
+        threading.Thread(target=clear_trash_detected).start()
+        global last_trash
+        if time.time() - last_trash > 5:
+            core.sound.play_sound_safecast("trash_detected")
+        last_trash = time.time()
 
     def handle_trash_thrown(self):
         with self.lock:
