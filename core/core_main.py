@@ -109,7 +109,7 @@ class RobotStatus:
         global last_trash
         if time.time() - last_trash > 5:
             core.sound.play_sound_safecast("help_me")
-        last_trash = time.time()
+            last_trash = time.time()
 
         if self._trash_detected:
             return
