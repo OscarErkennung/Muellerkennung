@@ -35,7 +35,7 @@ def camera_worker():
 
     # Webcam starten (0 = /dev/video0)
     for i in range(10):
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(i)
         if not cap.isOpened():
             logger.log(f"failed to open the webcam {i}", lvl=50)
         else:
@@ -54,6 +54,7 @@ def camera_worker():
             if not ret:
                 logger.log("failed to read the camera image", lvl=40)
                 print("Failed to read the camera image")
+                time.sleep(1)
                 continue
 
             # Zeitstempel für Dateinamen
