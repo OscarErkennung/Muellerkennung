@@ -18,11 +18,13 @@ autonomous_mode_enabled = False
 stop_flag = threading.Event()
 trash_count = 0
 last_lightbar_callback = 0
+last_trash = 0
 
 def stop_signal_handler(sig, frame):
     if os.environ.get("RUN_MAIN") == "true":
         print("Stopping CORE")
     global stop_flag
+    core.sound.play_sound_safecast("STOP")
     stop_flag.set()
     exit()
 
@@ -68,6 +70,8 @@ class RobotStatus:
     def set_is_autonomous(self, value):
         with self._lock:
             self._is_autonomous = value
+        if not self._is_autonomous:
+            core.sound.play_sound_safecast("ERROR")
 
     def get_is_autonomous(self):
         return self._is_autonomous
@@ -109,7 +113,7 @@ class RobotStatus:
         threading.Thread(target=clear_trash_detected).start()
         global last_trash
         if time.time() - last_trash > 5:
-            core.sound.play_sound_safecast("trash_detected")
+            core.sound.play_sound_safecast("help_me")
         last_trash = time.time()
 
     def handle_trash_thrown(self):

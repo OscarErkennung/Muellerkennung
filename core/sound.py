@@ -16,7 +16,7 @@ class Sound(Enum):
     light_beam = {'file':'applepay.mp3'}
     help_me = {'file':'Hilfe.mp3'}
     thanks = {'file':'Danke.mp3'}
-    trash_detected = {'file':'Müll entdeckt.mp3'}
+    trash_detected = {'file':'Muellentdeckt.mp3'}
 
 def play_sound_safecast(mysound:str): 
     try: 

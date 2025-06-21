@@ -13,7 +13,7 @@ ser = None
 
 DEBUG_FLAG:bool = False  # Set to True for debugging, False for production
 CALIBRATION_VALUE = 105
-DEFAULT_SPEED = 30
+DEFAULT_SPEED = 50
 
 #interface A,B,C,D = <uint_8t speed>
 
@@ -141,11 +141,12 @@ def move_robot_linear(dir:Direction , speed:int=DEFAULT_SPEED):
     
     for i in Motor:
           # Get the speed for the motor in the specified direction
-        to_send = f'{i}{lookup_directions.get(dir, {}).get(i, 0)}\n'
+        speed_engine = int(lookup_directions.get(dir, {}).get(i, 0) * (speed / 100))
+        to_send = f'{i}{speed_engine}\n'
         
         if not DEBUG_FLAG: 
             ser.write(to_send.encode('utf-8'))
-        print(f'Sent command: {i}={lookup_directions[dir][i]}')
+        print(f'Sent command: {to_send}')
     time.sleep(0.3)  # Allow time for the command to be processed   
     ser.flush()
 
@@ -166,11 +167,11 @@ def move_robot_angular_safecast(deg:float, speed:int=DEFAULT_SPEED):
     print(f"{motor_values=}")
     for i in Motor:
           # Get the speed for the motor in the specified direction
-        to_send = f'{i}{motor_values[i]}\n'
+        to_send = f'{i}{int(motor_values[i] * (speed / 100))}\n'
         
         if not DEBUG_FLAG: 
             ser.write(to_send.encode('utf-8'))
-        print(f'Sent command: {i}={motor_values[i]}')
+        print(f'Sent command: {to_send}')
     time.sleep(round(), 2)  # Allow time for the command to be processed
     ser.flush()
 
