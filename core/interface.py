@@ -88,18 +88,19 @@ def interface_setup(usb_port=0):
     global ser
     try: 
         if not DEBUG_FLAG: 
-            ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)#can be ttyUSB0 or ttyUSB1
+            ser = serial.Serial(f'/dev/ttyUSB{usb_port}', 9600, timeout=1)#can be ttyUSB0 or ttyUSB1
             time.sleep(4)
             if not ser.is_open: 
                  ser.open()
         else:
             ser = None  # For debugging, we don't open a real serial port
-        print("Serial port opened successfully.")
     except serial.SerialException as e: 
         logger.log(f"Error opening serial port: {e}", lvl=40)
         if usb_port < 10:
-            logger.log(f"Trying again using USB{usb_port}", lvl=40)
+            logger.log(f"Trying again using USB{usb_port + 1}", lvl=40)
             interface_setup(usb_port + 1)
+    if usb_port == 0:
+        print("Serial port opened successfully.")
 
 def interface_cleanup():
     try:
