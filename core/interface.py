@@ -84,7 +84,7 @@ def dir_from_angle(deg:float) -> dict:
     print(f"Scaled direction: {output}")
     return output
 
-def interface_setup(): 
+def interface_setup(usb_port=0): 
     global ser
     try: 
         if not DEBUG_FLAG: 
@@ -97,6 +97,9 @@ def interface_setup():
         print("Serial port opened successfully.")
     except serial.SerialException as e: 
         logger.log(f"Error opening serial port: {e}", lvl=40)
+        if usb_port < 10:
+            logger.log(f"Trying again using USB{usb_port}", lvl=40)
+            interface_setup(usb_port + 1)
 
 def interface_cleanup():
     try:

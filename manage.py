@@ -3,6 +3,8 @@
 import os
 import sys
 
+# export DISPLAY=:0.0
+os.environ["DISPLAY"] = ":0.0"
 
 def main():
     """Run administrative tasks."""

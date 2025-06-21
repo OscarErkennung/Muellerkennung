@@ -29,3 +29,4 @@ if __name__ == '__main__':
         GPIO.remove_event_detect(RECEIVER_PIN)
         GPIO.cleanup()
         print("Beendet.")
+
