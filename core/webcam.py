@@ -34,13 +34,19 @@ def camera_worker():
     height, width = input_shape[1], input_shape[2]
 
     # Webcam starten (0 = /dev/video0)
-    cap = cv2.VideoCapture(0)
+    for i in range(10):
+        cap = cv2.VideoCapture(0)
+        if not cap.isOpened():
+            logger.log(f"failed to open the webcam {i}", lvl=50)
+        else:
+            logger.log("Camera opened")
+            print("Camera opened")
+            break
+
     if not cap.isOpened():
         # TODO: proper exception handling / communicate this to the display.
-        logger.log("failed to open the webcam", lvl=50)
+        logger.log(f"failed to open any webcam", lvl=50)
         exit()
-    logger.log("Camera opened")
-    print("Camera opened")
 
     try:
         while not core_main.stop_flag.is_set():
