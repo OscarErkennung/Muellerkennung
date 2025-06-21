@@ -66,7 +66,7 @@ def camera_worker():
             # Bild vorbereiten
             img = cv2.resize(frame, (width, height))
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            input_data = np.expand_dims(img.astype(np.float32) / 255.0, axis=0) # Division by 255 to normalize model input
+            input_data = np.expand_dims(img.astype(np.float32), axis=0)
 
             # Modell ausführen
             interpreter.set_tensor(input_index, input_data)
