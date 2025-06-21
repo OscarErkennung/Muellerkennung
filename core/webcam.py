@@ -11,7 +11,8 @@ from datetime import datetime
 DETECTION_INTERVAL = 0.5  # seconds
 MAX_BILDER = 10
 
-MODEL_PATH = "mobile_net_v2_2025-06-19_15:30:28.718971_quantized.tflite"
+#MODEL_PATH = "mobile_net_v2_2025-06-19_15:30:28.718971_quantized.tflite"
+MODEL_PATH = "mobile_net_v2_2025-06-20_11_44_05.423688_cat_quantized.tflite"
 OUTPUT_DIR = "tmp"
 
 LABELS = ["notrash", "paper", "plastic", "trash"]
