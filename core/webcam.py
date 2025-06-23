@@ -8,7 +8,7 @@ import ai_edge_litert.interpreter as tflite
 import numpy as np
 from datetime import datetime
 
-DETECTION_INTERVAL = 0.5  # seconds
+DETECTION_INTERVAL = 0.2  # seconds
 MAX_BILDER = 10
 
 #MODEL_PATH = "mobile_net_v2_2025-06-19_15:30:28.718971_quantized.tflite"
