@@ -54,7 +54,7 @@ def camera_worker():
             if not ret:
                 logger.log("failed to read the camera image", lvl=40)
                 print("Failed to read the camera image")
-                time.sleep(1)
+                time.sleep(0.5)
                 continue
 
             # Zeitstempel für Dateinamen
