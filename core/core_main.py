@@ -103,7 +103,7 @@ class RobotStatus:
             with self._lock:
                 if self._trash_detected and self._trash_consumed_count == thrash_consumed:
                     self._trash_detected = False
-                    # core.sound.play_sound_safecast("ERROR")
+                    core.sound.play_sound_safecast("ERROR")
                     core.screen.set_image("face")
 
         global last_trash
